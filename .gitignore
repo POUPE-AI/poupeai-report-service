@@ -1,0 +1,58 @@
+# Ignore arquivos e pastas gerados pelo sistema
+.DS_Store
+Thumbs.db
+
+# Ignore pastas de build
+bin/
+obj/
+
+# Ignore arquivos de log
+*.log
+
+# Ignore arquivos de configuração de IDEs
+.vs/
+.vscode/
+*.user
+*.suo
+
+# Ignore arquivos de cache do NuGet
+*.nuget.cache
+project.nuget.cache
+
+# Ignore arquivos de build do Visual Studio
+*.dbmdl
+*.jfm
+*.pdb
+*.ilk
+*.idb
+*.tlog
+*.lastbuildstate
+*.sln.docstates
+
+# Ignore arquivos de configuração de contêiner
+Container/
+
+# Ignore arquivos de configuração de depuração
+launchSettings.json
+
+# Ignore arquivos de build do Docker
+Dockerfile*
+docker-compose*
+
+# Ignore arquivos de configuração do Git
+!.gitignore
+!.gitattributes
+
+# Ignore arquivos de configuração do MSBuild
+*.AssemblyAttributes.cs
+*.GeneratedMSBuildEditorConfig.editorconfig
+*.GlobalUsings.g.cs
+
+# Ignore arquivos de configuração do sistema operacional
+*.swp
+*.bak
+*.tmp
+
+# Ignore arquivos de licença e documentação
+LICENSE.txt
+README.md
