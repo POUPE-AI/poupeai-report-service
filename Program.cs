@@ -1,9 +1,16 @@
+using poupeai_report_service.Interfaces;
 using poupeai_report_service.Routes;
+using poupeai_report_service.Services.AI;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddHttpClient();
+builder.Services.AddScoped<DeepseekAIService>();
+builder.Services.AddScoped<GeminiAIService>();
+builder.Services.AddScoped<IAIService, AIServiceAggregator>();
 
 var app = builder.Build();
 
