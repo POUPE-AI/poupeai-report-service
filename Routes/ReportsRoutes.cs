@@ -14,8 +14,7 @@ namespace poupeai_report_service.Routes
         {
             var group = app.MapGroup("/api/v1/reports").WithTags("Reports");
 
-            // TODO: Implement overview report generation logic
-            group.MapGet("/overview", OverviewService.GenerateOverviewReport)
+            group.MapPost("/api/v1/overview", OverviewReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsOverviewOperation());
 
             // TODO: Implement expense report generation logic
@@ -34,5 +33,14 @@ namespace poupeai_report_service.Routes
             group.MapPost("/insights", ([AsParameters] PeriodFilters filters, [FromBody] InsightRequest insight) => "Insights report")
                 .WithOpenApi(ReportsDocumentation.GetReportsInsightsOperation());
         }
+
+        private static async Task<IResult> OverviewReportOperation(
+                    [FromServices] IServiceReport overviewService,
+                    [AsParameters] PeriodFilters filters,
+                    [FromServices] IAIService aiService,
+                    [FromQuery] AIModel model)
+                {
+                    return await overviewService.GenerateReport(filters, aiService, model);
+                }
+        }
     }
-}
