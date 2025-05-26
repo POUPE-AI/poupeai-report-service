@@ -1,8 +1,19 @@
+using MongoDB.Driver;
+using poupeai_report_service.Database;
 using poupeai_report_service.Interfaces;
 using poupeai_report_service.Routes;
+using poupeai_report_service.Services;
 using poupeai_report_service.Services.AI;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services));
+
+builder.Services.Configure<DatabaseSettings>(
+    builder.Configuration.GetSection("Database"));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -11,6 +22,17 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<DeepseekAIService>();
 builder.Services.AddScoped<GeminiAIService>();
 builder.Services.AddScoped<IAIService, AIServiceAggregator>();
+
+builder.Services.AddSingleton<IMongoDatabase>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var connectionString = config["Database:ConnectionString"];
+    var databaseName = config["Database:DatabaseName"];
+    var client = new MongoClient(connectionString);
+    return client.GetDatabase(databaseName);
+});
+
+builder.Services.AddScoped<IServiceReport, OverviewService>();
 
 var app = builder.Build();
 
