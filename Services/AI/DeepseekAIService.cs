@@ -18,7 +18,7 @@ internal class DeepseekAIService : IAIService
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _apiKey);
     }
 
-    public async Task<string> GenerateReportAsync(string prompt, AIModel model = AIModel.Deepseek)
+    public async Task<string> GenerateReportAsync(string prompt, string output = "", AIModel model = AIModel.Deepseek)
     {
         try
         {
@@ -27,6 +27,12 @@ internal class DeepseekAIService : IAIService
 
             if (model != AIModel.Deepseek)
                 throw new ArgumentOutOfRangeException(nameof(model), model, "Invalid AI model specified.");
+
+            if (!string.IsNullOrEmpty(output))
+            {
+                prompt = $"{prompt}\n\nA respota deve ser formatada como um relatório em json, extamente no formato:\n{output}\n\n";
+            }
+
 
             var requestBody = new
             {
