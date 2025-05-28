@@ -22,11 +22,8 @@ internal class OverviewService(IMongoDatabase database) : IServiceReport
     {
         try
         {
-            var transactionHash = @$"{transactionsData.AccountId}-
-                                     {transactionsData.StartDate}-
-                                     {transactionsData.EndDate}-[
-                                     {string.Join("", transactionsData.Transactions.Select(r => r.Id))}]";
-            var hash = Hash.GenerateFromString(transactionHash);
+            // Gerar hash dos dados a ser analisados
+            var hash = Hash.GenerateFromTransaction(transactionsData);
 
             var existingReport = await _reportsCollection.Find(r => r.Hash == hash).FirstOrDefaultAsync();
             if (existingReport != null)
@@ -35,13 +32,13 @@ internal class OverviewService(IMongoDatabase database) : IServiceReport
                 return Results.Ok(existingReport);
             }
 
-            var mockDataJson = JsonSerializer.Serialize(transactionsData);
+            var dataJson = JsonSerializer.Serialize(transactionsData);
 
             var prompt = $@"
             Gere um relatório geral de finanças.
             Utilize os seguintes dados mockados de exemplo para gerar o relatório (em formato JSON):
 
-            {mockDataJson}
+            {dataJson}
 
             Gere a análise textual, sugestão, saldo, total de receitas, total de despesas e categorias conforme o schema de output.
             ";

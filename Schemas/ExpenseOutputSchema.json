@@ -1,42 +1,39 @@
 {
     "type": "object",
     "properties": {
-        "textAnalysis": {
-            "type": "string"
-        },
-        "suggestion": {
-            "type": "string"
-        },
-        "balance": {
-            "type": "number"
-        },
-        "totalExpense": {
-            "type": "number"
-        },
+        "textAnalysis": { "type": "string" },
+        "suggestion": { "type": "string" },
+        "totalExpense": { "type": "number" },
         "categories": {
             "type": "array",
             "items": {
                 "type": "object",
                 "properties": {
-                    "name": {
-                        "type": "string"
-                    },
-                    "balance": {
-                        "type": "number"
-                    }
+                    "name": { "type": "string" },
+                    "balance": { "type": "number" }
                 },
                 "required": [
                     "name",
                     "balance"
                 ]
             }
+        },
+        "mainExpenses": {
+            "type": "array",
+            "properties": {
+                "description": { "type": "string" },
+                "transaction_date": { "type": "datetime" },
+                "value": { "type": "number" },
+                "category_name": { "type": "string" }
+            },
+            "required": ["description", "transaction_date", "value", "category_name"]
         }
     },
     "required": [
         "textAnalysis",
         "suggestion",
-        "balance",
         "totalExpense",
-        "categories"
+        "categories",
+        "mainExpenses"
     ]
 }

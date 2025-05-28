@@ -1,14 +1,25 @@
 using System.Security.Cryptography;
 using System.Text;
+using poupeai_report_service.DTOs.Requests;
 
 namespace poupeai_report_service.Utils;
 
-public static class Hash
+internal static class Hash
 {
-    public static string GenerateFromString(string input)
+    private static string Generate(string input)
     {
         var bytes = Encoding.UTF8.GetBytes(input);
         var hashBytes = SHA256.HashData(bytes);
         return BitConverter.ToString(hashBytes).Replace("-", "").ToLowerInvariant();
+    }
+
+    public static string GenerateFromTransaction(TransactionsData transactionsData)
+    {
+        var transactionHash = $"account_id: {transactionsData.AccountId}";
+        transactionHash = $"start_date: {transactionsData.StartDate}";
+        transactionHash = $"end_date: {transactionsData.EndDate}";
+        transactionHash = $"transacions_ids: [{string.Join(",", transactionsData.Transactions.Select(r => r.Id))}]";
+
+        return Generate(transactionHash);
     }
 }
