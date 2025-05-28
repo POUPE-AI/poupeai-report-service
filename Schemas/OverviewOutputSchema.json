@@ -1,0 +1,29 @@
+{
+    "type": "object",
+    "properties": {
+        "textAnalysis": { "type": "string" },
+        "suggestion": { "type": "string" },
+        "balance": { "type": "number" },
+        "totalIncome": { "type": "number" },
+        "totalExpense": { "type": "number" },
+        "categories": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string" },
+                    "balance": { "type": "number" }
+                },
+                "required": [ "name", "balance" ]
+            }
+        }
+    },
+    "required": [
+        "textAnalysis",
+        "suggestion",
+        "balance",
+        "totalIncome",
+        "totalExpense",
+        "categories"
+    ]
+}

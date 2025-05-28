@@ -1,5 +1,4 @@
-using System.Net.Http.Headers;
-using System.Net.Http.Json;
+using System.Text.Json;
 using poupeai_report_service.DTOs.Responses;
 using poupeai_report_service.Enums;
 using poupeai_report_service.Interfaces;
@@ -12,7 +11,7 @@ internal class GeminiAIService(IConfiguration configuration, HttpClient httpClie
     private readonly string _apiKey = configuration["GeminiAI:ApiKey"] ?? throw new ArgumentNullException(nameof(configuration), "API Key is not configured.");
     private const string BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
-    public async Task<string> GenerateReportAsync(string prompt, AIModel model = AIModel.Gemini)
+    public async Task<string> GenerateReportAsync(string prompt, string output, AIModel model = AIModel.Gemini)
     {
         try
         {
@@ -35,7 +34,12 @@ internal class GeminiAIService(IConfiguration configuration, HttpClient httpClie
                             new { text = prompt }
                         }
                     }
-                }
+                },
+                generationConfig = new
+                {
+                    responseMimeType = "application/json",
+                    responseSchema = JsonSerializer.Deserialize<object>(output)
+                },
             };
 
             var response = await _httpClient.PostAsJsonAsync(url, requestBody);

@@ -18,29 +18,29 @@ namespace poupeai_report_service.Routes
                 .WithOpenApi(ReportsDocumentation.GetReportsOverviewOperation());
 
             // TODO: Implement expense report generation logic
-            group.MapGet("/expense", ([AsParameters] PeriodFilters filters) => "Expense report")
+            group.MapGet("/expense", () => "Expense report")
                 .WithOpenApi(ReportsDocumentation.GetReportsExpenseOperation());
 
             // TODO: Implement income report generation logic
-            group.MapGet("/income", ([AsParameters] PeriodFilters filters) => "Income report")
+            group.MapGet("/income", () => "Income report")
                 .WithOpenApi(ReportsDocumentation.GetReportsIncomeOperation());
 
             // TODO: Implement category report generation logic
-            group.MapGet("/category/{categoryId}", (int categoryId, [AsParameters] PeriodFilters filters) => $"Category report for category {categoryId}")
+            group.MapGet("/category/{categoryId}", (int categoryId) => $"Category report for category {categoryId}")
                 .WithOpenApi(ReportsDocumentation.GetReportsCategoryOperation());
 
             // TODO: Implement insights report generation logic
-            group.MapPost("/insights", ([AsParameters] PeriodFilters filters, [FromBody] InsightRequest insight) => "Insights report")
+            group.MapPost("/insights", ([FromBody] InsightRequest insight) => "Insights report")
                 .WithOpenApi(ReportsDocumentation.GetReportsInsightsOperation());
         }
 
         private static async Task<IResult> OverviewReportOperation(
+                    [FromBody] TransactionsData transactionsData,
                     [FromServices] IServiceReport overviewService,
-                    [AsParameters] PeriodFilters filters,
                     [FromServices] IAIService aiService,
                     [FromQuery] AIModel model)
                 {
-                    return await overviewService.GenerateReport(filters, aiService, model);
+                    return await overviewService.GenerateReport(transactionsData, aiService, model);
                 }
         }
     }

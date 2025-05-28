@@ -8,12 +8,12 @@ internal class AIServiceAggregator(GeminiAIService geminiAIService, DeepseekAISe
     private readonly GeminiAIService _geminiAIService = geminiAIService;
     private readonly DeepseekAIService _deepseekAIService = deepseekAIService;
 
-    public async Task<string> GenerateReportAsync(string prompt, AIModel model = AIModel.Gemini)
+    public async Task<string> GenerateReportAsync(string prompt, string output = "", AIModel model = AIModel.Gemini)
     {
         return model switch
         {
-            AIModel.Gemini => await _geminiAIService.GenerateReportAsync(prompt),
-            AIModel.Deepseek => await _deepseekAIService.GenerateReportAsync(prompt),
+            AIModel.Gemini => await _geminiAIService.GenerateReportAsync(prompt, output),
+            AIModel.Deepseek => await _deepseekAIService.GenerateReportAsync(prompt, output),
             _ => throw new ArgumentOutOfRangeException(nameof(model), model, "Invalid AI model specified.")
         };
     }
