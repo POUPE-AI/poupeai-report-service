@@ -5,5 +5,5 @@ namespace poupeai_report_service.Interfaces;
 
 internal interface IServiceReport
 {
-    Task<IResult> GenerateReport(IAIService aiService, AIModel model = AIModel.Gemini);
+    Task<IResult> GenerateReport(TransactionsData transactionsData, IAIService aiService, AIModel model = AIModel.Gemini);
 }

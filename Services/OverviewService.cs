@@ -5,9 +5,7 @@ using poupeai_report_service.Enums;
 using poupeai_report_service.Interfaces;
 using poupeai_report_service.Models;
 using Serilog;
-using System.IO;
 using poupeai_report_service.Utils;
-using MongoDB.Bson;
 
 namespace poupeai_report_service.Services;
 
@@ -20,41 +18,14 @@ internal class OverviewService(IMongoDatabase database) : IServiceReport
     private readonly string output = File.ReadAllText(
         Path.Combine(AppContext.BaseDirectory, "Schemas", "OverviewOutputSchema.json"));
 
-    public async Task<IResult> GenerateReport(IAIService aiService, AIModel model = AIModel.Gemini)
+    public async Task<IResult> GenerateReport(TransactionsData transactionsData, IAIService aiService, AIModel model = AIModel.Gemini)
     {
-        // Mock data object
-        var mockData = new
-        {
-            AccountId = 124,
-            StartDate = "2023-01-01",
-            EndDate = "2023-12-31",
-            Receitas = new[]
-            {
-            new { Id = 1, Nome = "Salário", Valor = 5000.00 },
-            new { Id = 4, Nome = "Freelance", Valor = 1200.00 }
-            },
-            Despesas = new[]
-            {
-            new { Id = 2, Nome = "Aluguel", Valor = 1500.00 },
-            new { Id = 5, Nome = "Supermercado", Valor = 800.00 },
-            new { Id = 7, Nome = "Transporte", Valor = 300.00 },
-            new { Id = 9, Nome = "Lazer", Valor = 400.00 }
-            },
-            Categorias = new[]
-            {
-            new { Nome = "Moradia", Saldo = -1500.00 },
-            new { Nome = "Alimentação", Saldo = -800.00 },
-            new { Nome = "Transporte", Saldo = -300.00 },
-            new { Nome = "Lazer", Saldo = -400.00 },
-            new { Nome = "Renda", Saldo = 6200.00 }
-            }
-        };
-
         try
         {
-            var receitaIds = string.Join("", mockData.Receitas.Select(r => r.Id));
-            var despesaIds = string.Join("", mockData.Despesas.Select(d => d.Id));
-            var transactionHash = $"{mockData.AccountId}-{mockData.StartDate}-{mockData.EndDate}-[{receitaIds}]-[{despesaIds}]";
+            var transactionHash = @$"{transactionsData.AccountId}-
+                                     {transactionsData.StartDate}-
+                                     {transactionsData.EndDate}-[
+                                     {string.Join("", transactionsData.Transactions.Select(r => r.Id))}]";
             var hash = Hash.GenerateFromString(transactionHash);
 
             var existingReport = await _reportsCollection.Find(r => r.Hash == hash).FirstOrDefaultAsync();
@@ -64,7 +35,7 @@ internal class OverviewService(IMongoDatabase database) : IServiceReport
                 return Results.Ok(existingReport);
             }
 
-            var mockDataJson = JsonSerializer.Serialize<object>(mockData);
+            var mockDataJson = JsonSerializer.Serialize(transactionsData);
 
             var prompt = $@"
             Gere um relatório geral de finanças.
@@ -92,9 +63,9 @@ internal class OverviewService(IMongoDatabase database) : IServiceReport
             }
 
             deserializedResult.Hash = hash;
-            deserializedResult.AccountId = mockData.AccountId;
-            deserializedResult.StartDate = DateOnly.Parse(mockData.StartDate);
-            deserializedResult.EndDate = DateOnly.Parse(mockData.EndDate);
+            deserializedResult.AccountId = transactionsData.AccountId;
+            deserializedResult.StartDate = transactionsData.StartDate;
+            deserializedResult.EndDate = transactionsData.EndDate;
             deserializedResult.UpdatedAt = DateTime.UtcNow;
 
             // Save the report to the database

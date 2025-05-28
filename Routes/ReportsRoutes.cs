@@ -35,11 +35,12 @@ namespace poupeai_report_service.Routes
         }
 
         private static async Task<IResult> OverviewReportOperation(
+                    [FromBody] TransactionsData transactionsData,
                     [FromServices] IServiceReport overviewService,
                     [FromServices] IAIService aiService,
                     [FromQuery] AIModel model)
                 {
-                    return await overviewService.GenerateReport(aiService, model);
+                    return await overviewService.GenerateReport(transactionsData, aiService, model);
                 }
         }
     }
