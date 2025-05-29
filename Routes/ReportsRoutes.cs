@@ -1,10 +1,11 @@
-﻿using System.ComponentModel;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using poupeai_report_service.Documentation;
 using poupeai_report_service.DTOs.Requests;
 using poupeai_report_service.Enums;
 using poupeai_report_service.Interfaces;
 using poupeai_report_service.Services;
+using poupeai_report_service.Utils;
+using Serilog;
 
 namespace poupeai_report_service.Routes
 {
@@ -14,11 +15,10 @@ namespace poupeai_report_service.Routes
         {
             var group = app.MapGroup("/api/v1/reports").WithTags("Reports");
 
-            group.MapPost("/api/v1/overview", OverviewReportOperation)
+            group.MapPost("/overview", OverviewReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsOverviewOperation());
 
-            // TODO: Implement expense report generation logic
-            group.MapGet("/expense", () => "Expense report")
+            group.MapPost("/expense", ExpenseReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsExpenseOperation());
 
             group.MapGet("/income", IncomeReportOperation)
@@ -34,30 +34,41 @@ namespace poupeai_report_service.Routes
         }
 
         private static async Task<IResult> OverviewReportOperation(
-                    [FromBody] TransactionsData transactionsData,
-                    [FromServices] IServiceReport overviewService,
-                    [FromServices] IAIService aiService,
-                    [FromQuery] AIModel model)
-        {
-            return await overviewService.GenerateReport(transactionsData, aiService, model);
-        }
-        
-        private static async Task<IResult> IncomeReportOperation(
             [FromBody] TransactionsData transactionsData,
-            [FromServices] IServiceReport incomeService,
+            [FromServices] OverviewService overviewService,
             [FromServices] IAIService aiService,
-            [FromQuery] string model = "gemini"
-        )
+            [FromQuery] string model = "gemini")
         {
             try
-            {   
-                var aiModel = AIModel.Gemini;
-                
-                return await incomeService.GenerateReport(transactionsData, aiService, aiModel);
+            {
+                var aiModel = Tools.StringToModel(model);
+
+                return await overviewService.GenerateReport(transactionsData, aiService, aiModel);
             }
             catch (Exception ex)
             {
-                return Results.Problem(ex.Message);
+                Log.Error(ex, "Error generating expense report");
+                return Results.Problem($"An error occurred while generating the expense report: {ex.Message}");
+            }
+        }
+
+        private static async Task<IResult> ExpenseReportOperation(
+            [FromBody] TransactionsData transactionsData,
+            [FromServices] ExpenseService expenseService,
+            [FromServices] IAIService aiService,
+            [FromQuery] string model = "Gemini"
+        )
+        {
+            try
+            {
+                var aiModel = Tools.StringToModel(model);
+
+                return await expenseService.GenerateReport(transactionsData, aiService, aiModel);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error generating expense report");
+                return Results.Problem($"An error occurred while generating the expense report: {ex.Message}");
             }
         }
     }

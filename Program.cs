@@ -23,7 +23,7 @@ builder.Services.AddScoped<DeepseekAIService>();
 builder.Services.AddScoped<GeminiAIService>();
 builder.Services.AddScoped<IAIService, AIServiceAggregator>();
 
-builder.Services.AddSingleton<IMongoDatabase>(sp =>
+builder.Services.AddSingleton(sp =>
 {
     var config = sp.GetRequiredService<IConfiguration>();
     var connectionString = config["Database:ConnectionString"];
@@ -32,7 +32,8 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     return client.GetDatabase(databaseName);
 });
 
-builder.Services.AddScoped<IServiceReport, OverviewService>();
+builder.Services.AddScoped<OverviewService>();
+builder.Services.AddScoped<ExpenseService>();
 
 var app = builder.Build();
 

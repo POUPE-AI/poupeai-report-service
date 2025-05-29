@@ -22,11 +22,8 @@ internal class OverviewService(IMongoDatabase database) : IServiceReport
     {
         try
         {
-            var transactionHash = @$"{transactionsData.AccountId}-
-                                     {transactionsData.StartDate}-
-                                     {transactionsData.EndDate}-[
-                                     {string.Join("", transactionsData.Transactions.Select(r => r.Id))}]";
-            var hash = Hash.GenerateFromString(transactionHash);
+            // Gerar hash dos dados a ser analisados
+            var hash = Hash.GenerateFromTransaction(transactionsData, model);
 
             var existingReport = await _reportsCollection.Find(r => r.Hash == hash).FirstOrDefaultAsync();
             if (existingReport != null)
@@ -35,13 +32,13 @@ internal class OverviewService(IMongoDatabase database) : IServiceReport
                 return Results.Ok(existingReport);
             }
 
-            var mockDataJson = JsonSerializer.Serialize(transactionsData);
+            var dataJson = JsonSerializer.Serialize(transactionsData);
 
             var prompt = $@"
             Gere um relatório geral de finanças.
             Utilize os seguintes dados mockados de exemplo para gerar o relatório (em formato JSON):
 
-            {mockDataJson}
+            {dataJson}
 
             Gere a análise textual, sugestão, saldo, total de receitas, total de despesas e categorias conforme o schema de output.
             ";
@@ -54,25 +51,43 @@ internal class OverviewService(IMongoDatabase database) : IServiceReport
                 return Results.Problem("Failed to generate the report due to empty response from AI service.");
             }
 
-            var deserializedResult = JsonSerializer.Deserialize<OverviewReportModel>(result);
-
-            if (deserializedResult == null)
+            try
             {
-                _logger.Error("Failed to deserialize AI service response for overview report.");
-                return Results.Problem("Failed to generate the report due to deserialization error.");
+                var deserializedResult = JsonSerializer.Deserialize<OverviewReportModel>(result);
+
+                if (deserializedResult == null)
+                {
+                    _logger.Error("Failed to deserialize AI service response for overview report.");
+                    return Results.Problem("Failed to generate the report due to deserialization error.");
+                }
+
+                deserializedResult.Hash = hash;
+                deserializedResult.AccountId = transactionsData.AccountId;
+                deserializedResult.StartDate = transactionsData.StartDate;
+                deserializedResult.EndDate = transactionsData.EndDate;
+                deserializedResult.UpdatedAt = DateTime.UtcNow;
+
+                // Save the report to the database
+                await _reportsCollection.InsertOneAsync(deserializedResult);
+
+                _logger.Information("Overview report generated and saved successfully with hash: {Hash}", hash);
+                return Results.Ok(deserializedResult);
             }
+            catch
+            {
+                return Results.Problem("Failed to generate the report from AI service response. Please check the AI service.");
+            }
+        }
 
-            deserializedResult.Hash = hash;
-            deserializedResult.AccountId = transactionsData.AccountId;
-            deserializedResult.StartDate = transactionsData.StartDate;
-            deserializedResult.EndDate = transactionsData.EndDate;
-            deserializedResult.UpdatedAt = DateTime.UtcNow;
-
-            // Save the report to the database
-            await _reportsCollection.InsertOneAsync(deserializedResult);
-
-            _logger.Information("Overview report generated and saved successfully with hash: {Hash}", hash);
-            return Results.Ok(deserializedResult);
+        catch (ArgumentNullException argEx)
+        {
+            _logger.Error(argEx, "Argument null error generating overview report");
+            return Results.Problem("An error occurred while generating the report: missing required data.");
+        }
+        catch (InvalidOperationException invOpEx)
+        {
+            _logger.Error(invOpEx, "Invalid operation error generating overview report");
+            return Results.Problem("An error occurred while generating the report: invalid operation.");
         }
         catch (Exception ex)
         {

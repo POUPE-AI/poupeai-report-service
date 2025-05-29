@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using poupeai_report_service.DTOs.Responses;
 using poupeai_report_service.Enums;
 using poupeai_report_service.Interfaces;
+using Serilog;
 
 namespace poupeai_report_service.Services.AI;
 
@@ -55,19 +56,24 @@ internal class DeepseekAIService : IAIService
             };
 
             var response = await _httpClient.PostAsJsonAsync(BASE_URL, requestBody);
-            response.EnsureSuccessStatusCode();
+            
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                throw new HttpRequestException($"Error from Deepseek AI: {response.StatusCode}");
+            }
 
             var result = await response.Content.ReadFromJsonAsync<DeepSeekResponse>();
             return result?.Choices?[0].Message?.Content ?? throw new Exception("Empty response from Deepseek AI.");
         }
         catch (HttpRequestException ex)
         {
-            Console.WriteLine($"Request error: {ex.Message}");
+            Log.Error(ex, "HTTP request error while communicating with Deepseek AI service.");
             return "An error occurred while communicating with the AI service.";
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error on generating report: {ex.Message}");
+            Log.Error(ex, "Error generating report with Deepseek AI service.");
             return $"Error on generating report: {ex.Message}";
         }
     }

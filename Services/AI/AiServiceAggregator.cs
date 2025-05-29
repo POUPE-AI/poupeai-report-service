@@ -8,8 +8,19 @@ internal class AIServiceAggregator(GeminiAIService geminiAIService, DeepseekAISe
     private readonly GeminiAIService _geminiAIService = geminiAIService;
     private readonly DeepseekAIService _deepseekAIService = deepseekAIService;
 
+    private const string RESPONSE_RULES = @"
+        Use as regras abaixo para gerar o relatório:
+        1. As repostas devem ser em português.
+        2. Caso não não tenha informações suficientes, 
+           retorne uma mensagem informando que não é possível gerar o relatório.
+        3. Sempre retorne o relatório no formato JSON.
+        4. Nas listas, retorne no máximo 5, porém pode retornar menos se não houver informações suficientes.
+        ";
+
     public async Task<string> GenerateReportAsync(string prompt, string output = "", AIModel model = AIModel.Gemini)
     {
+        prompt = $"{prompt}\n\n{RESPONSE_RULES}";
+        
         return model switch
         {
             AIModel.Gemini => await _geminiAIService.GenerateReportAsync(prompt, output),
