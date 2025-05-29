@@ -64,7 +64,6 @@ namespace poupeai_report_service.Routes
             [FromServices] ExpenseService expenseService,
             [FromServices] IAIService aiService,
             [FromQuery] string model = "gemini"
-            [FromQuery] string model = "gemini"
         )
         {
             try
@@ -115,7 +114,7 @@ namespace poupeai_report_service.Routes
             [FromBody] CategoryReportRequest categoryReportRequest,
             [FromServices] CategoryService categoryService,
             [FromServices] IAIService aiService,
-            [FromQuery] string model = "Gemini"
+            [FromQuery] string model = "gemini"
         )
         {
             try
