@@ -1,0 +1,42 @@
+{
+    "type": "object",
+    "properties": {
+        "textAnalysis": { "type": "string" },
+        "suggestion": { "type": "string" },
+        "totalIncome": { "type": "number" },
+        "categories": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": { "type": "string" },
+                    "balance": { "type": "number" }
+                },
+                "required": [
+                    "name",
+                    "balance"
+                ]
+            }
+        },
+        "mainIncomes": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "description": { "type": "string" },
+                    "transaction_date": { "type": "string" },
+                    "value": { "type": "number" },
+                    "category_name": { "type": "string" }
+                },
+                "required": ["description", "transaction_date", "value", "category_name"]
+            }
+        }
+    },
+    "required": [
+        "textAnalysis",
+        "suggestion",
+        "totalIncome",
+        "categories",
+        "mainIncomes"
+    ]
+}
