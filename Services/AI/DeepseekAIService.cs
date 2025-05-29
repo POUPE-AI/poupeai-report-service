@@ -60,7 +60,7 @@ internal class DeepseekAIService : IAIService
             if (!response.IsSuccessStatusCode)
             {
                 var errorContent = await response.Content.ReadAsStringAsync();
-                throw new HttpRequestException($"Error from Deepseek AI: {response.StatusCode} - {errorContent}");
+                throw new HttpRequestException($"Error from Deepseek AI: {response.StatusCode}");
             }
 
             var result = await response.Content.ReadFromJsonAsync<DeepSeekResponse>();
