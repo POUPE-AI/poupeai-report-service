@@ -21,8 +21,7 @@ namespace poupeai_report_service.Routes
             group.MapGet("/expense", () => "Expense report")
                 .WithOpenApi(ReportsDocumentation.GetReportsExpenseOperation());
 
-            // TODO: Implement income report generation logic
-            group.MapGet("/income", () => "Income report")
+            group.MapGet("/income", IncomeReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsIncomeOperation());
 
             // TODO: Implement category report generation logic
@@ -39,8 +38,27 @@ namespace poupeai_report_service.Routes
                     [FromServices] IServiceReport overviewService,
                     [FromServices] IAIService aiService,
                     [FromQuery] AIModel model)
-                {
-                    return await overviewService.GenerateReport(transactionsData, aiService, model);
-                }
+        {
+            return await overviewService.GenerateReport(transactionsData, aiService, model);
+        }
+        
+        private static async Task<IResult> IncomeReportOperation(
+            [FromBody] TransactionsData transactionsData,
+            [FromServices] IServiceReport incomeService,
+            [FromServices] IAIService aiService,
+            [FromQuery] string model = "gemini"
+        )
+        {
+            try
+            {   
+                var aiModel = AIModel.Gemini;
+                
+                return await incomeService.GenerateReport(transactionsData, aiService, aiModel);
+            }
+            catch (Exception ex)
+            {
+                return Results.Problem(ex.Message);
+            }
         }
     }
+}
