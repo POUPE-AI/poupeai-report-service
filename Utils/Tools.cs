@@ -53,12 +53,12 @@ internal static class Tools
     {
         return status switch
         {
-            200 => Results.Ok(header),
+            200 => Results.Ok(new { Header = header }),
             204 => Results.NoContent(),
-            400 => Results.BadRequest(header),
+            400 => Results.BadRequest(new { Header = header }),
             401 => Results.Unauthorized(),
             403 => Results.Forbid(),
-            404 => Results.NotFound(header),
+            404 => Results.NotFound(new { Header = header }),
             500 => Results.Problem(header.Message, statusCode: 500),
             _ => Results.Problem("An unexpected error occurred.", statusCode: status)
         };
