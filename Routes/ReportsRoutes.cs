@@ -21,8 +21,7 @@ namespace poupeai_report_service.Routes
             group.MapPost("/expense", ExpenseReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsExpenseOperation());
 
-            // TODO: Implement income report generation logic
-            group.MapGet("/income", () => "Income report")
+            group.MapPost("/income", IncomeReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsIncomeOperation());
 
             // TODO: Implement category report generation logic
@@ -42,6 +41,11 @@ namespace poupeai_report_service.Routes
         {
             try
             {
+                if (transactionsData == null || transactionsData.Transactions == null || transactionsData.Transactions.Count == 0)
+                {
+                    return Results.BadRequest("No transactions data provided.");
+                }
+
                 var aiModel = Tools.StringToModel(model);
 
                 return await overviewService.GenerateReport(transactionsData, aiService, aiModel);
@@ -57,11 +61,16 @@ namespace poupeai_report_service.Routes
             [FromBody] TransactionsData transactionsData,
             [FromServices] ExpenseService expenseService,
             [FromServices] IAIService aiService,
-            [FromQuery] string model = "Gemini"
+            [FromQuery] string model = "gemini"
         )
         {
             try
             {
+                if (transactionsData == null || transactionsData.Transactions == null || transactionsData.Transactions.Count == 0)
+                {
+                    return Results.BadRequest("No transactions data provided.");
+                }
+
                 var aiModel = Tools.StringToModel(model);
 
                 return await expenseService.GenerateReport(transactionsData, aiService, aiModel);
@@ -70,6 +79,31 @@ namespace poupeai_report_service.Routes
             {
                 Log.Error(ex, "Error generating expense report");
                 return Results.Problem($"An error occurred while generating the expense report: {ex.Message}");
+            }
+        }
+
+        private static async Task<IResult> IncomeReportOperation(
+            [FromBody] TransactionsData transactionsData,
+            [FromServices] IncomeService incomeService,
+            [FromServices] IAIService aiService,
+            [FromQuery] string model = "gemini"
+        )
+        {
+            try
+            {
+                if (transactionsData == null || transactionsData.Transactions == null || transactionsData.Transactions.Count == 0)
+                {
+                    return Results.BadRequest("No transactions data provided.");
+                }
+                
+                var aiModel = Tools.StringToModel(model);
+
+                return await incomeService.GenerateReport(transactionsData, aiService, aiModel);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error generating income report");
+                return Results.Problem($"An error occurred while generating the income report: {ex.Message}");
             }
         }
     }

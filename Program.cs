@@ -34,6 +34,7 @@ builder.Services.AddSingleton(sp =>
 
 builder.Services.AddScoped<OverviewService>();
 builder.Services.AddScoped<ExpenseService>();
+builder.Services.AddScoped<IncomeService>();
 
 var app = builder.Build();
 
