@@ -52,9 +52,6 @@ namespace poupeai_report_service.Documentation
                                         "A resposta inclui a soma das receitas e despesas, o saldo total, a tendência para os próximos meses " +
                                         "e sugestões geradas pela IA.";
 
-                if (operation.Parameters.Count > 0)
-                    operation.Parameters[0].Description = "ID da categoria para a qual o relatório deve ser gerado.";
-
                 return operation;
             };
         }

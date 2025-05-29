@@ -1,8 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Mvc;
 using poupeai_report_service.Documentation;
 using poupeai_report_service.DTOs.Requests;
+using poupeai_report_service.DTOs.Responses.Content;
 using poupeai_report_service.Enums;
 using poupeai_report_service.Interfaces;
+using poupeai_report_service.Models;
 using poupeai_report_service.Services;
 using poupeai_report_service.Utils;
 using Serilog;
@@ -25,8 +28,7 @@ namespace poupeai_report_service.Routes
             group.MapGet("/income", () => "Income report")
                 .WithOpenApi(ReportsDocumentation.GetReportsIncomeOperation());
 
-            // TODO: Implement category report generation logic
-            group.MapGet("/category/{categoryId}", (int categoryId) => $"Category report for category {categoryId}")
+            group.MapPost("/category", CategoryReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsCategoryOperation());
 
             // TODO: Implement insights report generation logic
@@ -57,7 +59,7 @@ namespace poupeai_report_service.Routes
             [FromBody] TransactionsData transactionsData,
             [FromServices] ExpenseService expenseService,
             [FromServices] IAIService aiService,
-            [FromQuery] string model = "Gemini"
+            [FromQuery] string model = "gemini"
         )
         {
             try
@@ -71,6 +73,34 @@ namespace poupeai_report_service.Routes
                 Log.Error(ex, "Error generating expense report");
                 return Results.Problem($"An error occurred while generating the expense report: {ex.Message}");
             }
+        }
+
+        
+        private static async Task<IResult> CategoryReportOperation(
+            [FromBody] CategoryReportRequest categoryReportRequest,
+            [FromServices] CategoryService categoryService,
+            [FromServices] IAIService aiService,
+            [FromQuery] string model = "Gemini"
+        )
+        {
+            try
+            {
+                var aiModel = Tools.StringToModel(model);
+
+                return await categoryService.GenerateReportAsync(
+                                categoryReportRequest,
+                                aiService,
+                                aiModel,
+                                Tools.DeserializeJson<CategoryReportResponse>,
+                                response => CategoryReportModel.CreateFromDTO(response.Content)
+                            );
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error generating category report");
+                return Results.Problem($"An error occurred while generating the category report: {ex.Message}");
+            }
+            
         }
     }
 }

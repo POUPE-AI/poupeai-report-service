@@ -1,0 +1,75 @@
+{
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ]
+    },
+    "content": {
+      "type": "object",
+      "properties": {
+        "category": {
+          "type": "string"
+        },
+        "total": {
+          "type": "number"
+        },
+        "average": {
+          "type": "number"
+        },
+        "trend": {
+          "type": "string"
+        },
+        "main_transactions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "date": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "peak_days": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "text_analysis": {
+          "type": "string"
+        },
+        "suggestion": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "category",
+        "total",
+        "average",
+        "text_analysis",
+        "suggestion"
+      ]
+    }
+  },
+  "required": [
+    "header"
+  ]
+}
