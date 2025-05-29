@@ -20,13 +20,16 @@
         },
         "mainExpenses": {
             "type": "array",
-            "properties": {
-                "description": { "type": "string" },
-                "transaction_date": { "type": "datetime" },
-                "value": { "type": "number" },
-                "category_name": { "type": "string" }
-            },
-            "required": ["description", "transaction_date", "value", "category_name"]
+            "items": {
+                "type": "object",
+                "properties": {
+                    "description": { "type": "string" },
+                    "transaction_date": { "type": "string" },
+                    "value": { "type": "number" },
+                    "category_name": { "type": "string" }
+                },
+                "required": ["description", "transaction_date", "value", "category_name"]
+            }
         }
     },
     "required": [

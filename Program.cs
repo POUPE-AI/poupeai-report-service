@@ -32,8 +32,8 @@ builder.Services.AddSingleton(sp =>
     return client.GetDatabase(databaseName);
 });
 
-builder.Services.AddScoped<IServiceReport, OverviewService>();
-builder.Services.AddScoped<IServiceReport, ExpenseService>();
+builder.Services.AddScoped<OverviewService>();
+builder.Services.AddScoped<ExpenseService>();
 
 var app = builder.Build();
 
