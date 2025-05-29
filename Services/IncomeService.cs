@@ -7,13 +7,13 @@ using poupeai_report_service.Models;
 using poupeai_report_service.Utils;
 using Serilog;
 
-internal class ExpenseService(IMongoDatabase database) : IServiceReport
+internal class IncomeService(IMongoDatabase database) : IServiceReport
 {
-    private readonly Serilog.ILogger _logger = Log.ForContext("Service", nameof(ExpenseService));
+    private readonly Serilog.ILogger _logger = Log.ForContext("Service", nameof(IncomeService));
 
-    private readonly IMongoCollection<ExpenseReportModel> _reportsCollection = database.GetCollection<ExpenseReportModel>("expensereports");
+    private readonly IMongoCollection<IncomeReportModel> _reportsCollection = database.GetCollection<IncomeReportModel>("incomereports");
 
-    private readonly string Output = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Schemas", "ExpenseOutputSchema.json"));
+    private readonly string Output = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "Schemas", "IncomeOutputSchema.json"));
 
     public async Task<IResult> GenerateReport(TransactionsData transactionsData, IAIService aiService, AIModel model = AIModel.Gemini)
     {
@@ -26,7 +26,7 @@ internal class ExpenseService(IMongoDatabase database) : IServiceReport
             var existingReport = await _reportsCollection.Find(r => r.Hash == hash).FirstOrDefaultAsync();
             if (existingReport != null)
             {
-                _logger.Debug("Expense report already exists for hash: {Hash}", hash);
+                _logger.Debug("Income report already exists for hash: {Hash}", hash);
                 return Results.Ok(existingReport);
             }
 
@@ -34,12 +34,12 @@ internal class ExpenseService(IMongoDatabase database) : IServiceReport
             var dataJson = JsonSerializer.Serialize(transactionsData);
 
             var prompt = $@"
-                Gere um relatório financeiro para as despesas.
+                Gere um relatório financeiro para as receitas.
                 Utilize os seguintes dados abaixo para gerar o relatório (em formato JSON):
 
                 {dataJson}
 
-                Gere a análise textual, sugestão, total de despesas, até 5 categorias e 
+                Gere a análise textual, sugestão, total de receitas, até 5 categorias e 
                 até 5 transações princiapais conforme o schema de output.";
 
             // Fazer requisição ao serviço de IA
@@ -47,17 +47,17 @@ internal class ExpenseService(IMongoDatabase database) : IServiceReport
 
             if (string.IsNullOrEmpty(result))
             {
-                _logger.Error("AI service returned an empty result for expense report generation.");
+                _logger.Error("AI service returned an empty result for income report generation.");
                 return Results.Problem("Failed to generate the report due to empty response from AI service.");
             }
 
             try
             {
-                var deserializedResult = JsonSerializer.Deserialize<ExpenseReportModel>(result);
+                var deserializedResult = JsonSerializer.Deserialize<IncomeReportModel>(result);
 
                 if (deserializedResult == null)
                 {
-                    _logger.Error("Failed to deserialize AI service response for expense report.");
+                    _logger.Error("Failed to deserialize AI service response for income report.");
                     return Results.Problem("Failed to generate the report due to deserialization error.");
                 }
 
@@ -70,7 +70,7 @@ internal class ExpenseService(IMongoDatabase database) : IServiceReport
                 // Salvar relatório no banco de dados
                 await _reportsCollection.InsertOneAsync(deserializedResult);
 
-                _logger.Information("Expense report generated and saved successfully with hash: {Hash}", hash);
+                _logger.Information("income report generated and saved successfully with hash: {Hash}", hash);
                 return Results.Ok(deserializedResult);
             }
             catch
@@ -80,7 +80,7 @@ internal class ExpenseService(IMongoDatabase database) : IServiceReport
         }
         catch (Exception ex)
         {
-            _logger.Error(ex, "Error generating Expense report");
+            _logger.Error(ex, "Error generating income report");
             return Results.Problem("An error occurred while generating the report.");
         }
     }
