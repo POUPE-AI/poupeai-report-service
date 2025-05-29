@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MongoDB.Bson.Serialization.Attributes;
 using poupeai_report_service.DTOs.Responses.Content;
 
@@ -16,13 +17,16 @@ internal class CategoryReportModel : BaseReportModel
 
     [BsonElement("trend")]
     [BsonIgnoreIfNull]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Trend { get; set; }
 
     [BsonElement("peak_days")]
     [BsonIgnoreIfNull]
-    public string[]? PeakDays { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public List<string>? PeakDays { get; set; }
 
     [BsonElement("main_transactions")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<TransactionModel>? Transactions { get; set; }
 
     /// <summary>

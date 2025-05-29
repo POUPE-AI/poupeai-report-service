@@ -1,8 +1,6 @@
 using System.Text.Json;
-using MongoDB.Bson;
 using MongoDB.Driver;
 using poupeai_report_service.DTOs.Requests;
-using poupeai_report_service.DTOs.Responses;
 using poupeai_report_service.Enums;
 using poupeai_report_service.Interfaces;
 using poupeai_report_service.Models;
@@ -51,7 +49,14 @@ internal abstract class BaseReportService<TModel, TResponse>(IMongoDatabase data
             if (existingReport != null)
             {
                 _logger.Information("Report already exists for hash: {Hash}", hash);
-                return Results.Ok(existingReport);
+                return Results.Ok(new
+            {
+                Header = new
+                {
+                    Status = 200,
+                },
+                Content = existingReport
+            });
             }
 
             var dataJson = JsonSerializer.Serialize(transactionsData);
@@ -66,7 +71,6 @@ internal abstract class BaseReportService<TModel, TResponse>(IMongoDatabase data
                 return Results.Problem("Failed to generate the report due to empty response from AI service.");
             }
 
-            Console.WriteLine("Raw AI response: " + result);
             var response = deserializeResponse(result);
             if (response == null)
             {
@@ -89,14 +93,6 @@ internal abstract class BaseReportService<TModel, TResponse>(IMongoDatabase data
                 return Results.Problem("Failed to generate the report due to null content in AI service response.");
             }
 
-            var transactions = (response as dynamic).Content.Transactions as IEnumerable<object>;
-            if (transactions != null)
-            {
-                foreach (var t in transactions)
-                {
-                    Console.WriteLine(t.ToString());
-                }
-            }
             var reportModel = mapToModel(response);
             reportModel.Hash = hash;
             reportModel.AccountId = transactionsData.AccountId;
@@ -108,7 +104,11 @@ internal abstract class BaseReportService<TModel, TResponse>(IMongoDatabase data
             await _collection.InsertOneAsync(reportModel);
 
             _logger.Information("Report generated and saved successfully for hash: {Hash}", hash);
-            return Results.Created(string.Empty, reportModel);
+            return Results.Created(string.Empty, new
+            {
+                (response as dynamic).Header,
+                Content = reportModel
+            });
         }
         catch (Exception ex)
         {

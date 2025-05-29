@@ -17,7 +17,7 @@ internal record CategoryReportResponse : BaseReportResponse
     public string? Trend { get; init; }
 
     [JsonPropertyName("peak_days")]
-    public string[]? PeakDays { get; init; }
+    public List<string>? PeakDays { get; init; }
 
     [JsonPropertyName("main_transactions")]
     public List<TransactionReportResponse> Transactions { get; init; } = null!;
