@@ -1,0 +1,40 @@
+{
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer"
+        },
+        "message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "status"
+      ]
+    },
+    "content": {
+      "type": "object",
+      "properties": {
+        "text_analysis": {
+          "type": "string"
+        },
+        "suggestion": {
+          "type": "string"
+        },
+        "insight_response": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "text_analysis",
+        "insight_response"
+      ]
+    }
+  },
+  "required": [
+    "header"
+  ]
+}

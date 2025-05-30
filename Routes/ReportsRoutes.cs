@@ -30,8 +30,7 @@ namespace poupeai_report_service.Routes
             group.MapPost("/category", CategoryReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsCategoryOperation());
 
-            // TODO: Implement insights report generation logic
-            group.MapPost("/insights", ([FromBody] InsightRequest insight) => "Insights report")
+            group.MapPost("/insights", InsightReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsInsightsOperation());
         }
 
@@ -97,7 +96,7 @@ namespace poupeai_report_service.Routes
                 {
                     return Results.BadRequest("No transactions data provided.");
                 }
-                
+
                 var aiModel = Tools.StringToModel(model);
 
                 return await incomeService.GenerateReport(transactionsData, aiService, aiModel);
@@ -109,7 +108,7 @@ namespace poupeai_report_service.Routes
             }
         }
 
-        
+
         private static async Task<IResult> CategoryReportOperation(
             [FromBody] CategoryReportRequest categoryReportRequest,
             [FromServices] CategoryService categoryService,
@@ -134,7 +133,34 @@ namespace poupeai_report_service.Routes
                 Log.Error(ex, "Error generating category report");
                 return Results.Problem($"An error occurred while generating the category report: {ex.Message}");
             }
-            
+
+        }
+        
+        
+        private static async Task<IResult> InsightReportOperation(
+            [FromBody] InsightReportRequest insightReportRequest,
+            [FromServices] InsightService insightService,
+            [FromServices] IAIService aiService,
+            [FromQuery] string model = "gemini"
+            )
+        {
+            try
+            {
+                var aiModel = Tools.StringToModel(model);
+
+                return await insightService.GenerateReportAsync(
+                                insightReportRequest,
+                                aiService,
+                                aiModel,
+                                Tools.DeserializeJson<InsightReportResponse>,
+                                response => InsightReportModel.CreateFromDTO(response.Content)
+                            );
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error generating insight report");
+                return Results.Problem($"An error occurred while generating the insight report: {ex.Message}");
+            }
         }
     }
 }
