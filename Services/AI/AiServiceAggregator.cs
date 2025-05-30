@@ -15,6 +15,7 @@ internal class AIServiceAggregator(GeminiAIService geminiAIService, DeepseekAISe
            retorne uma mensagem informando que não é possível gerar o relatório.
         3. Sempre retorne o relatório no formato JSON.
         4. Nas listas, retorne no máximo 5, porém pode retornar menos se não houver informações suficientes.
+        5. Se não houver dados suficientes, responda com um status equivalente, e uma mensagem em português, siga os padrões do HTTP response para os status, exemplo: 200.
         ";
 
     public async Task<string> GenerateReportAsync(string prompt, string output = "", AIModel model = AIModel.Gemini)
