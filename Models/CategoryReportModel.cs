@@ -39,6 +39,8 @@ internal class CategoryReportModel : BaseReportModel
 
         return new CategoryReportModel
         {
+            TextAnalysis = response.TextAnalysis,
+            Suggestion = response.Suggestion,
             Category = response.Category,
             Total = response.Total,
             Average = response.Average,
