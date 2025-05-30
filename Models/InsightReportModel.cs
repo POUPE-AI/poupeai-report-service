@@ -22,6 +22,7 @@ internal class InsightReportModel : BaseReportModel
         {
             TextAnalysis = response.TextAnalysis,
             Suggestion = response.Suggestion,
+            InsightResponse = response.InsightResponse,
         };
     }
 }
