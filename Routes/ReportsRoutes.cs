@@ -74,7 +74,13 @@ namespace poupeai_report_service.Routes
 
                 var aiModel = Tools.StringToModel(model);
 
-                return await expenseService.GenerateReport(transactionsData, aiService, aiModel);
+                return await expenseService.GenerateReportAsync(
+                                transactionsData,
+                                aiService,
+                                aiModel,
+                                Tools.DeserializeJson<ExpenseReportResponse>,
+                                response => ExpenseReportModel.CreateFromDTO(response.Content)
+                            );
             }
             catch (Exception ex)
             {
