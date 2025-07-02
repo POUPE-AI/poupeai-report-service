@@ -71,10 +71,20 @@ internal abstract class BaseReportService<TModel, TResponse>(IMongoDatabase data
                 return Results.Problem("Failed to generate the report due to empty response from AI service.");
             }
 
-            var response = deserializeResponse(result);
+            TResponse? response;
+            try
+            {
+                response = deserializeResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Failed to deserialize AI service response. Raw response: {RawResponse}", result);
+                return Results.Problem("Failed to generate the report due to deserialization error.");
+            }
+
             if (response == null)
             {
-                _logger.Error("Failed to deserialize AI service response for report.");
+                _logger.Error("Failed to deserialize AI service response for report. Response was null.");
                 return Results.Problem("Failed to generate the report due to deserialization error.");
             }
 
