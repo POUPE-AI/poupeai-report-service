@@ -39,7 +39,7 @@ O **PoupeAI Report Service** analisa dados de transações financeiras e gera re
 
 1. **Clone o repositório**
    ```bash
-   git clone <url-do-repositorio>
+   git clone https://github.com/POUPE-AI/poupeai-report-service
    cd poupeai-report-service
    ```
 

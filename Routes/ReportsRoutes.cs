@@ -49,7 +49,13 @@ namespace poupeai_report_service.Routes
 
                 var aiModel = Tools.StringToModel(model);
 
-                return await overviewService.GenerateReport(transactionsData, aiService, aiModel);
+                return await overviewService.GenerateReportAsync(
+                                transactionsData,
+                                aiService,
+                                aiModel,
+                                Tools.DeserializeJson<OverviewReportResponse>,
+                                response => OverviewReportModel.CreateFromDTO(response.Content)
+                            );
             }
             catch (Exception ex)
             {
