@@ -1,6 +1,7 @@
 using System.Text.Json;
 using poupeai_report_service.DTOs.Responses;
 using poupeai_report_service.Enums;
+using Serilog;
 
 namespace poupeai_report_service.Utils;
 
@@ -41,7 +42,20 @@ internal static class Tools
     {
         try
         {
-            return JsonSerializer.Deserialize<AIResponse<T>>(json);;
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                throw new InvalidOperationException("JSON string is null or empty");
+            }
+
+            // Log first 100 characters for debugging
+            var preview = json.Length > 100 ? json.Substring(0, 100) + "..." : json;
+            Log.Information($"Attempting to deserialize JSON: {preview}");
+
+            return JsonSerializer.Deserialize<AIResponse<T>>(json);
+        }
+        catch (JsonException ex)
+        {
+            throw new InvalidOperationException($"Failed to deserialize JSON: {ex.Message}. JSON content preview: {(json?.Length > 200 ? json.Substring(0, 200) + "..." : json)}", ex);
         }
         catch (Exception ex)
         {
@@ -62,5 +76,35 @@ internal static class Tools
             500 => Results.Problem(header.Message, statusCode: 500),
             _ => Results.Problem("An unexpected error occurred.", statusCode: status)
         };
+    }
+
+    public static string CreateErrorResponse(string errorMessage)
+    {
+        return JsonSerializer.Serialize(new
+        {
+            header = new
+            {
+                status = 500,
+                message = errorMessage
+            },
+            content = new
+            {
+                text_analysis = "Não foi possível gerar a análise devido a um erro no serviço.",
+                suggestion = "Tente novamente mais tarde.",
+                insight_response = errorMessage,
+                total_expense = 0.0,
+                total_income = 0.0,
+                balance = 0.0,
+                categories = Array.Empty<object>(),
+                main_expenses = Array.Empty<object>(),
+                main_incomes = Array.Empty<object>(),
+                category = "Erro",
+                total = 0.0,
+                average = 0.0,
+                trend = "Não disponível",
+                main_transactions = Array.Empty<object>(),
+                peak_days = Array.Empty<string>()
+            }
+        });
     }
 }

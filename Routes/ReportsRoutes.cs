@@ -49,7 +49,13 @@ namespace poupeai_report_service.Routes
 
                 var aiModel = Tools.StringToModel(model);
 
-                return await overviewService.GenerateReport(transactionsData, aiService, aiModel);
+                return await overviewService.GenerateReportAsync(
+                                transactionsData,
+                                aiService,
+                                aiModel,
+                                Tools.DeserializeJson<OverviewReportResponse>,
+                                response => OverviewReportModel.CreateFromDTO(response.Content)
+                            );
             }
             catch (Exception ex)
             {
@@ -74,7 +80,13 @@ namespace poupeai_report_service.Routes
 
                 var aiModel = Tools.StringToModel(model);
 
-                return await expenseService.GenerateReport(transactionsData, aiService, aiModel);
+                return await expenseService.GenerateReportAsync(
+                                transactionsData,
+                                aiService,
+                                aiModel,
+                                Tools.DeserializeJson<ExpenseReportResponse>,
+                                response => ExpenseReportModel.CreateFromDTO(response.Content)
+                            );
             }
             catch (Exception ex)
             {
@@ -99,7 +111,13 @@ namespace poupeai_report_service.Routes
 
                 var aiModel = Tools.StringToModel(model);
 
-                return await incomeService.GenerateReport(transactionsData, aiService, aiModel);
+                return await incomeService.GenerateReportAsync(
+                                transactionsData,
+                                aiService,
+                                aiModel,
+                                Tools.DeserializeJson<IncomeReportResponse>,
+                                response => IncomeReportModel.CreateFromDTO(response.Content)
+                            );
             }
             catch (Exception ex)
             {

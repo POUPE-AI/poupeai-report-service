@@ -1,42 +1,87 @@
 {
-    "type": "object",
-    "properties": {
-        "textAnalysis": { "type": "string" },
-        "suggestion": { "type": "string" },
-        "totalIncome": { "type": "number" },
-        "categories": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "name": { "type": "string" },
-                    "balance": { "type": "number" }
-                },
-                "required": [
-                    "name",
-                    "balance"
-                ]
-            }
+  "type": "object",
+  "properties": {
+    "header": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "integer"
         },
-        "mainIncomes": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "description": { "type": "string" },
-                    "transaction_date": { "type": "string" },
-                    "value": { "type": "number" },
-                    "category_name": { "type": "string" }
-                },
-                "required": ["description", "transaction_date", "value", "category_name"]
-            }
+        "message": {
+          "type": "string"
         }
+      },
+      "required": [
+        "status"
+      ]
     },
-    "required": [
-        "textAnalysis",
+    "content": {
+      "type": "object",
+      "properties": {
+        "text_analysis": {
+          "type": "string"
+        },
+        "suggestion": {
+          "type": "string"
+        },
+        "total_income": {
+          "type": "number"
+        },
+        "categories": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "balance": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "name",
+              "balance"
+            ]
+          }
+        },
+        "main_incomes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "description": {
+                "type": "string"
+              },
+              "transaction_date": {
+                "type": "string"
+              },
+              "value": {
+                "type": "number"
+              },
+              "category_name": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "description",
+              "transaction_date",
+              "value",
+              "category_name"
+            ]
+          }
+        }
+      },
+      "required": [
+        "text_analysis",
         "suggestion",
-        "totalIncome",
+        "total_income",
         "categories",
-        "mainIncomes"
-    ]
+        "main_incomes"
+      ]
+    }
+  },
+  "required": [
+    "header"
+  ]
 }
