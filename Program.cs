@@ -35,6 +35,7 @@ builder.Services.AddSingleton(sp =>
 builder.Services.AddScoped<OverviewService>();
 builder.Services.AddScoped<ExpenseService>();
 builder.Services.AddScoped<IncomeService>();
+builder.Services.AddScoped<SavingsEstimateService>();
 
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<InsightService>();
@@ -56,5 +57,6 @@ api_group.MapGet("", () => Results.Ok(new {
 }));
 
 app.MapReportsRoutes();
+app.MapSavingsRoutes();
 
 app.Run();
