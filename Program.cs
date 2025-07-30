@@ -22,6 +22,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["Keycloak:ValidIssuer"],
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,

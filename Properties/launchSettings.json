@@ -37,7 +37,7 @@
       },
       "publishAllPorts": true,
       "useSSL": true,
-      "containerName": "poupeai",
+      "containerName": "reports-service",
       "httpPort": 80
     }
   },
