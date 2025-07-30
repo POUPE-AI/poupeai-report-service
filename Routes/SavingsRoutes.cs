@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.OpenApi.Models;
 using poupeai_report_service.DTOs.Requests;
 using poupeai_report_service.Interfaces;
 using poupeai_report_service.Services;
@@ -14,15 +15,32 @@ public static class SavingsRoutes
 {
     public static void MapSavingsRoutes(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/v1/savings").WithTags("Savings");
+        var group = app.MapGroup("/api/v1/savings").WithTags("Savings").RequireAuthorization();
 
         group.MapPost("/estimate", SavingsEstimateOperation)
             .WithOpenApi(operation => new(operation)
             {
-            Summary = "Calcular economia estimada",
-            Description = "Calcula a economia estimada comparando o período atual com o período anterior com base nas datas das transações. " +
+                Summary = "Calcular economia estimada",
+                Description = "Calcula a economia estimada comparando o período atual com o período anterior com base nas datas das transações. " +
                      "Suporta comparações mensais, semanais e anuais. " +
-                     "Parâmetros de consulta: model (gemini|deepseek, padrão: gemini), comparisonType (monthly|weekly|yearly, padrão: monthly)"
+                     "Parâmetros de consulta: model (gemini|deepseek, padrão: gemini), comparisonType (monthly|weekly|yearly, padrão: monthly)",
+
+                Security =
+                [
+                    new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                }
+                            }, []
+                        }
+                    }
+                ]
             });
     }
 
@@ -38,8 +56,8 @@ public static class SavingsRoutes
         {
             if (transactionsData?.Transactions == null || !transactionsData.Transactions.Any())
             {
-                return Results.BadRequest(new 
-                { 
+                return Results.BadRequest(new
+                {
                     error = "Transaction data is required",
                     message = "Please provide a list of transactions with dates from multiple periods for comparison"
                 });
@@ -48,18 +66,18 @@ public static class SavingsRoutes
             var aiModel = Tools.StringToModel(model);
 
             return await savingsService.CalculateEstimatedSavingsAsync(
-                transactionsData, 
-                aiService, 
-                aiModel, 
+                transactionsData,
+                aiService,
+                aiModel,
                 comparisonType);
         }
         catch (ArgumentOutOfRangeException ex) when (ex.ParamName == "model")
         {
             Log.Error(ex, "Invalid AI model specified: {Model}", model);
-            return Results.BadRequest(new 
-            { 
-                error = "Invalid AI model", 
-                message = $"Model '{model}' is not supported. Use 'gemini' or 'deepseek'." 
+            return Results.BadRequest(new
+            {
+                error = "Invalid AI model",
+                message = $"Model '{model}' is not supported. Use 'gemini' or 'deepseek'."
             });
         }
         catch (Exception ex)

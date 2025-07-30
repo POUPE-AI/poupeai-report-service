@@ -16,7 +16,7 @@ namespace poupeai_report_service.Routes
     {
         public static void MapReportsRoutes(this IEndpointRouteBuilder app)
         {
-            var group = app.MapGroup("/api/v1/reports").WithTags("Reports");
+            var group = app.MapGroup("/api/v1/reports").WithTags("Reports").RequireAuthorization();
 
             group.MapPost("/overview", OverviewReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsOverviewOperation());
