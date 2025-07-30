@@ -50,13 +50,13 @@ internal abstract class BaseReportService<TModel, TResponse>(IMongoDatabase data
             {
                 _logger.Information("Report already exists for hash: {Hash}", hash);
                 return Results.Ok(new
-            {
-                Header = new
                 {
-                    Status = 200,
-                },
-                Content = existingReport
-            });
+                    Header = new
+                    {
+                        Status = 200,
+                    },
+                    Content = existingReport
+                });
             }
 
             var dataJson = JsonSerializer.Serialize(transactionsData);
@@ -105,7 +105,7 @@ internal abstract class BaseReportService<TModel, TResponse>(IMongoDatabase data
 
             var reportModel = mapToModel(response);
             reportModel.Hash = hash;
-            reportModel.AccountId = transactionsData.AccountId;
+            reportModel.AccountId = transactionsData.AccountId ?? string.Empty; // Garantir que AccountId não seja nulo
             reportModel.StartDate = transactionsData.StartDate;
             reportModel.EndDate = transactionsData.EndDate;
             reportModel.UpdatedAt = DateTime.UtcNow;

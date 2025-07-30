@@ -27,6 +27,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
         };
 
+        options.SaveToken = true;
+
         options.Events = new JwtBearerEvents
         {
             OnAuthenticationFailed = context =>
@@ -76,6 +78,7 @@ builder.Services.AddSwaggerGen(c =>
 );
 
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<DeepseekAIService>();
 builder.Services.AddScoped<GeminiAIService>();
 builder.Services.AddScoped<IAIService, AIServiceAggregator>();
@@ -89,6 +92,7 @@ builder.Services.AddSingleton(sp =>
     return client.GetDatabase(databaseName);
 });
 
+builder.Services.AddScoped<FinancesService>();
 builder.Services.AddScoped<OverviewService>();
 builder.Services.AddScoped<ExpenseService>();
 builder.Services.AddScoped<IncomeService>();
