@@ -1,4 +1,5 @@
-﻿using System.Text.Json;
+﻿using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using poupeai_report_service.Documentation;
 using poupeai_report_service.DTOs.Requests;
@@ -18,33 +19,60 @@ namespace poupeai_report_service.Routes
         {
             var group = app.MapGroup("/api/v1/reports").WithTags("Reports").RequireAuthorization();
 
-            group.MapPost("/overview", OverviewReportOperation)
+            group.MapGet("/overview", OverviewReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsOverviewOperation());
 
-            group.MapPost("/expense", ExpenseReportOperation)
+            group.MapGet("/expense", ExpenseReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsExpenseOperation());
 
-            group.MapPost("/income", IncomeReportOperation)
+            group.MapGet("/income", IncomeReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsIncomeOperation());
 
-            group.MapPost("/category", CategoryReportOperation)
+            group.MapGet("/category", CategoryReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsCategoryOperation());
 
-            group.MapPost("/insights", InsightReportOperation)
+            group.MapGet("/insights", InsightReportOperation)
                 .WithOpenApi(ReportsDocumentation.GetReportsInsightsOperation());
         }
 
         private static async Task<IResult> OverviewReportOperation(
-            [FromBody] TransactionsData transactionsData,
+            ClaimsPrincipal user,
+            [FromServices] FinancesService financeService,
             [FromServices] OverviewService overviewService,
             [FromServices] IAIService aiService,
+            [FromQuery] DateOnly? startDate,
+            [FromQuery] DateOnly? endDate,
             [FromQuery] string model = "gemini")
         {
             try
             {
-                if (transactionsData == null || transactionsData.Transactions == null || transactionsData.Transactions.Count == 0)
+                // Validar datas
+                var sDate = startDate ?? DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-1));
+                var eDate = endDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
+
+                // Obter transações do Django
+                var transactions = await financeService.GetTransactionsAsync(sDate, eDate);
+
+                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
                 {
-                    return Results.BadRequest("No transactions data provided.");
+                    Log.Warning("User ID not found in claims for overview report generation.");
+                    return Results.Unauthorized();
+                }
+
+                // Mapear para TransactionsData DTO se necessário, ou ajustar GenerateReport para receber List<Transaction>
+                var transactionsData = new TransactionsData
+                {
+                    Transactions = transactions,
+                    StartDate = sDate,
+                    EndDate = eDate,
+                    AccountId = userId
+                };
+
+
+                if (transactionsData.Transactions == null || transactionsData.Transactions.Count == 0)
+                {
+                    return Results.NotFound("No transactions found for the specified period.");
                 }
 
                 var aiModel = Tools.StringToModel(model);
@@ -57,25 +85,58 @@ namespace poupeai_report_service.Routes
                                 response => OverviewReportModel.CreateFromDTO(response.Content)
                             );
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                Log.Warning(ex, "Unauthorized access attempt to Django Finance Service.");
+                return Results.Unauthorized(); // Retorna 401 se não tiver token para chamar o Django
+            }
+            catch (HttpRequestException ex)
+            {
+                Log.Error(ex, "Error calling Finance Service.");
+                return Results.Problem($"Failed to retrieve transactions from finance service: {ex.Message}");
+            }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error generating expense report");
-                return Results.Problem($"An error occurred while generating the expense report: {ex.Message}");
+                Log.Error(ex, "Error generating overview report");
+                return Results.Problem($"An error occurred while generating the overview report: {ex.Message}");
             }
         }
 
         private static async Task<IResult> ExpenseReportOperation(
-            [FromBody] TransactionsData transactionsData,
+            ClaimsPrincipal user,
+            [FromServices] FinancesService financeService,
             [FromServices] ExpenseService expenseService,
             [FromServices] IAIService aiService,
+            [FromQuery] DateOnly? startDate,
+            [FromQuery] DateOnly? endDate,
             [FromQuery] string model = "gemini"
         )
         {
             try
             {
-                if (transactionsData == null || transactionsData.Transactions == null || transactionsData.Transactions.Count == 0)
+                var sDate = startDate ?? DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-1));
+                var eDate = endDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
+
+                var transactions = await financeService.GetTransactionsAsync(sDate, eDate);
+
+                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
                 {
-                    return Results.BadRequest("No transactions data provided.");
+                    Log.Warning("User ID not found in claims for expense report generation.");
+                    return Results.Unauthorized();
+                }
+
+                var transactionsData = new TransactionsData
+                {
+                    Transactions = transactions,
+                    StartDate = sDate,
+                    EndDate = eDate,
+                    AccountId = userId
+                };
+
+                if (transactionsData.Transactions == null || transactionsData.Transactions.Count == 0)
+                {
+                    return Results.NotFound("No transactions found for the specified period.");
                 }
 
                 var aiModel = Tools.StringToModel(model);
@@ -96,17 +157,40 @@ namespace poupeai_report_service.Routes
         }
 
         private static async Task<IResult> IncomeReportOperation(
-            [FromBody] TransactionsData transactionsData,
+            ClaimsPrincipal user,
+            [FromServices] FinancesService financeService,
             [FromServices] IncomeService incomeService,
             [FromServices] IAIService aiService,
+            [FromQuery] DateOnly? startDate,
+            [FromQuery] DateOnly? endDate,
             [FromQuery] string model = "gemini"
         )
         {
             try
             {
-                if (transactionsData == null || transactionsData.Transactions == null || transactionsData.Transactions.Count == 0)
+                var sDate = startDate ?? DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-1));
+                var eDate = endDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
+
+                var transactions = await financeService.GetTransactionsAsync(sDate, eDate);
+
+                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
                 {
-                    return Results.BadRequest("No transactions data provided.");
+                    Log.Warning("User ID not found in claims for income report generation.");
+                    return Results.Unauthorized();
+                }
+
+                var transactionsData = new TransactionsData
+                {
+                    Transactions = transactions,
+                    StartDate = sDate,
+                    EndDate = eDate,
+                    AccountId = userId
+                };
+
+                if (transactionsData.Transactions == null || transactionsData.Transactions.Count == 0)
+                {
+                    return Results.NotFound("No transactions found for the specified period.");
                 }
 
                 var aiModel = Tools.StringToModel(model);
@@ -128,18 +212,46 @@ namespace poupeai_report_service.Routes
 
 
         private static async Task<IResult> CategoryReportOperation(
-            [FromBody] CategoryReportRequest categoryReportRequest,
+            ClaimsPrincipal user,
+            [FromServices] FinancesService financeService,
             [FromServices] CategoryService categoryService,
             [FromServices] IAIService aiService,
+            [FromQuery] DateOnly? startDate,
+            [FromQuery] DateOnly? endDate,
             [FromQuery] string model = "gemini"
         )
         {
             try
             {
+                var sDate = startDate ?? DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-1));
+                var eDate = endDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
+
+                var transactions = await financeService.GetTransactionsAsync(sDate, eDate);
+
+                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    Log.Warning("User ID not found in claims for category report generation.");
+                    return Results.Unauthorized();
+                }
+
+                var transactionsData = new TransactionsData
+                {
+                    Transactions = transactions,
+                    StartDate = sDate,
+                    EndDate = eDate,
+                    AccountId = userId
+                };
+
+                if (transactionsData.Transactions == null || transactionsData.Transactions.Count == 0)
+                {
+                    return Results.NotFound("No transactions found for the specified period.");
+                }
+
                 var aiModel = Tools.StringToModel(model);
 
                 return await categoryService.GenerateReportAsync(
-                                categoryReportRequest,
+                                transactionsData,
                                 aiService,
                                 aiModel,
                                 Tools.DeserializeJson<CategoryReportResponse>,
@@ -153,8 +265,8 @@ namespace poupeai_report_service.Routes
             }
 
         }
-        
-        
+
+
         private static async Task<IResult> InsightReportOperation(
             [FromBody] InsightReportRequest insightReportRequest,
             [FromServices] InsightService insightService,

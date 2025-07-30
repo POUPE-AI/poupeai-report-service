@@ -6,7 +6,7 @@ namespace poupeai_report_service.DTOs.Requests;
 internal record TransactionsData
 {
     [Description("ID da conta para a qual as transações serão buscadas.")]
-    public long AccountId { get; set; }
+    public string? AccountId { get; set; }
 
     [Description("Data de início para filtrar as transações.")]
     public DateOnly StartDate { get; set; }
