@@ -268,14 +268,46 @@ namespace poupeai_report_service.Routes
 
 
         private static async Task<IResult> InsightReportOperation(
-            [FromBody] InsightReportRequest insightReportRequest,
+            ClaimsPrincipal user,
+            [FromQuery] string insightText,
+            [FromServices] FinancesService financeService,
             [FromServices] InsightService insightService,
             [FromServices] IAIService aiService,
+            [FromQuery] DateOnly? startDate,
+            [FromQuery] DateOnly? endDate,
             [FromQuery] string model = "gemini"
-            )
+        )
         {
             try
             {
+                var sDate = startDate ?? DateOnly.FromDateTime(DateTime.UtcNow.AddMonths(-1));
+                var eDate = endDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
+
+                var transactions = await financeService.GetTransactionsAsync(sDate, eDate);
+
+                var userId = user.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    Log.Warning("User ID not found in claims for insight report generation.");
+                    return Results.Unauthorized();
+                }
+
+                if (transactions == null || transactions.Count == 0)
+                {
+                    return Results.NotFound("No transactions found for the specified period.");
+                }
+
+                // Preencher dados no insightReportRequest
+
+                var insightReportRequest = new InsightReportRequest
+                {
+                    Transactions = transactions,
+                    StartDate = sDate,
+                    EndDate = eDate,
+                    AccountId = userId,
+                    InsightText = insightText
+                };
+
                 var aiModel = Tools.StringToModel(model);
 
                 return await insightService.GenerateReportAsync(

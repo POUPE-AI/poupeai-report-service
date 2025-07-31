@@ -22,6 +22,7 @@ internal class InsightService(IMongoDatabase database)
             {dataJson}
 
             Sua resposta deve conter:
+            - É importante que as informações tenhão relação com o insight enviado pelo usuário.
             - Uma análise textual geral das transações do usuário, destacando pontos importantes do comportamento financeiro.
             - Uma sugestão prática e objetiva para ajudar o usuário a melhorar sua saúde financeira(Opcional).
             - Uma resposta detalhada e personalizada para a mensagem de insight enviada pelo usuário, levando em conta o contexto das transações.
