@@ -26,6 +26,14 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
+            IssuerSigningKeyResolver = (token, securityToken, kid, parameters) =>
+            {
+                var client = new HttpClient();
+                var jwksUri = $"{builder.Configuration["Keycloak:Authority"]}/protocol/openid-connect/certs";
+                var jwksJson = client.GetStringAsync(jwksUri).Result;
+                var jwks = new JsonWebKeySet(jwksJson);
+                return jwks.GetSigningKeys();
+            }
         };
 
         options.SaveToken = true;
