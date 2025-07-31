@@ -2,7 +2,7 @@ name: CI/CD para Poupe.AI Report Service
 
 on:
   push:
-    branches: [ "master", "feat/implement-ci-cd" ]
+    branches: [ "master" ]
 
 env:
   DOTNET_VERSION: 8.0.x
