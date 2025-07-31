@@ -134,3 +134,6 @@ $RECYCLE.BIN/
 
 # VS Code settings
 .history/
+
+appsettings.Development.json
+appsettings.Production.json
