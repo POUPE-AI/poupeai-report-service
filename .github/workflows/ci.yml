@@ -2,7 +2,7 @@ name: CI/CD para Poupe.AI Report Service
 
 on:
   push:
-    branches: [ "master", "fix/authority_error" ]
+    branches: [ "master" ]
 
 env:
   DOTNET_VERSION: 8.0.x
