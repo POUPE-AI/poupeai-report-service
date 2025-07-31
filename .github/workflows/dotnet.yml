@@ -7,7 +7,7 @@ on:
 env:
   DOTNET_VERSION: 8.0.x
   IMAGE_NAME: franciscopaulinoq/poupeai-report-service
-  INFRA_DIR: /home/deployer/poupei-infra
+  INFRA_DIR: /home/deployer/poupeai-infra
 
 jobs:
   build:
