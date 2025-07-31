@@ -50,13 +50,13 @@ internal abstract class BaseReportService<TModel, TResponse>(IMongoDatabase data
             {
                 _logger.Information("Report already exists for hash: {Hash}", hash);
                 return Results.Ok(new
-            {
-                Header = new
                 {
-                    Status = 200,
-                },
-                Content = existingReport
-            });
+                    Header = new
+                    {
+                        Status = 200,
+                    },
+                    Content = existingReport
+                });
             }
 
             var dataJson = JsonSerializer.Serialize(transactionsData);
@@ -71,10 +71,20 @@ internal abstract class BaseReportService<TModel, TResponse>(IMongoDatabase data
                 return Results.Problem("Failed to generate the report due to empty response from AI service.");
             }
 
-            var response = deserializeResponse(result);
+            TResponse? response;
+            try
+            {
+                response = deserializeResponse(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Failed to deserialize AI service response. Raw response: {RawResponse}", result);
+                return Results.Problem("Failed to generate the report due to deserialization error.");
+            }
+
             if (response == null)
             {
-                _logger.Error("Failed to deserialize AI service response for report.");
+                _logger.Error("Failed to deserialize AI service response for report. Response was null.");
                 return Results.Problem("Failed to generate the report due to deserialization error.");
             }
 
@@ -95,7 +105,7 @@ internal abstract class BaseReportService<TModel, TResponse>(IMongoDatabase data
 
             var reportModel = mapToModel(response);
             reportModel.Hash = hash;
-            reportModel.AccountId = transactionsData.AccountId;
+            reportModel.AccountId = transactionsData.AccountId ?? string.Empty; // Garantir que AccountId não seja nulo
             reportModel.StartDate = transactionsData.StartDate;
             reportModel.EndDate = transactionsData.EndDate;
             reportModel.UpdatedAt = DateTime.UtcNow;

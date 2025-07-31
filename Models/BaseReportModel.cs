@@ -11,7 +11,7 @@ internal abstract class BaseReportModel
     public string Hash { get; set; } = string.Empty;
 
     [BsonElement("account_id")]
-    public long AccountId { get; set; }
+    public string AccountId { get; set; } = string.Empty;
 
     [BsonElement("user_id")]
     public DateOnly StartDate { get; set; }
