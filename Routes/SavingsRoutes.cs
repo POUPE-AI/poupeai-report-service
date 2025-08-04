@@ -15,7 +15,7 @@ public static class SavingsRoutes
 {
     public static void MapSavingsRoutes(this IEndpointRouteBuilder app)
     {
-        var group = app.MapGroup("/api/v1/savings").WithTags("Savings").RequireAuthorization();
+        var group = app.MapGroup("/api/v1/savings").WithTags("Savings");
 
         group.MapPost("/estimate", SavingsEstimateOperation)
             .WithOpenApi(operation => new(operation)
@@ -24,23 +24,6 @@ public static class SavingsRoutes
                 Description = "Calcula a economia estimada comparando o período atual com o período anterior com base nas datas das transações. " +
                      "Suporta comparações mensais, semanais e anuais. " +
                      "Parâmetros de consulta: model (gemini|deepseek, padrão: gemini), comparisonType (monthly|weekly|yearly, padrão: monthly)",
-
-                Security =
-                [
-                    new OpenApiSecurityRequirement
-                    {
-                        {
-                            new OpenApiSecurityScheme
-                            {
-                                Reference = new OpenApiReference
-                                {
-                                    Type = ReferenceType.SecurityScheme,
-                                    Id = "Bearer"
-                                }
-                            }, []
-                        }
-                    }
-                ]
             });
     }
 

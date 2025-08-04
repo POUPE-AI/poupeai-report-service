@@ -24,7 +24,14 @@ internal class SavingsEstimateService
         {
             if (transactionsData?.Transactions == null || !transactionsData.Transactions.Any())
             {
-                return Results.BadRequest("Transaction data is required.");
+                var emptyDataResponse = new SavingsEstimateResponse
+                {
+                    EstimatedSavings = 0,
+                    SavingsPercentage = 0,
+                    Message = "Não é possível calcular economia sem dados de transações.",
+                    ComparisonPeriod = comparisonType
+                };
+                return Results.Ok(emptyDataResponse);
             }
 
             // Separar as transações por período baseado nas datas
@@ -33,7 +40,26 @@ internal class SavingsEstimateService
 
             if (!previousPeriodTransactions.Any())
             {
-                return Results.BadRequest($"Insufficient data for {comparisonType} comparison. Need transactions from at least two periods.");
+                var insufficientDataResponse = new SavingsEstimateResponse
+                {
+                    EstimatedSavings = 0,
+                    SavingsPercentage = 0,
+                    Message = $"Dados insuficientes para comparação {comparisonType}. São necessárias transações de pelo menos dois períodos.",
+                    ComparisonPeriod = comparisonType
+                };
+                return Results.Ok(insufficientDataResponse);
+            }
+
+            if (!currentPeriodTransactions.Any())
+            {
+                var noCurrentDataResponse = new SavingsEstimateResponse
+                {
+                    EstimatedSavings = 0,
+                    SavingsPercentage = 0,
+                    Message = $"Não há transações no período atual para realizar a comparação {comparisonType}.",
+                    ComparisonPeriod = comparisonType
+                };
+                return Results.Ok(noCurrentDataResponse);
             }
 
             var analysisData = new
@@ -118,7 +144,7 @@ internal class SavingsEstimateService
     {
         var currentStart = new DateTime(referenceDate.Year, referenceDate.Month, 1);
         var currentEnd = currentStart.AddMonths(1).AddDays(-1);
-        
+
         var previousStart = currentStart.AddMonths(-1);
         var previousEnd = currentStart.AddDays(-1);
 
@@ -132,7 +158,7 @@ internal class SavingsEstimateService
 
         var currentStart = referenceDate.AddDays(-daysFromMonday).Date;
         var currentEnd = currentStart.AddDays(6);
-        
+
         var previousStart = currentStart.AddDays(-7);
         var previousEnd = currentStart.AddDays(-1);
 
@@ -143,7 +169,7 @@ internal class SavingsEstimateService
     {
         var currentStart = new DateTime(referenceDate.Year, 1, 1);
         var currentEnd = new DateTime(referenceDate.Year, 12, 31);
-        
+
         var previousStart = new DateTime(referenceDate.Year - 1, 1, 1);
         var previousEnd = new DateTime(referenceDate.Year - 1, 12, 31);
 
@@ -153,7 +179,7 @@ internal class SavingsEstimateService
     private static string BuildPrompt(object analysisData, string comparisonType)
     {
         var dataJson = JsonSerializer.Serialize(analysisData);
-        
+
         return $@"
             Analise os dados financeiros de dois períodos e calcule uma economia estimada simples.
             
