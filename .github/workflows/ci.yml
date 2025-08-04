@@ -64,6 +64,8 @@ jobs:
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
           script: |
+            set -e
+            
             echo "--- Login no Docker Hub ---"
             echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
 
@@ -71,10 +73,10 @@ jobs:
             cd ${{ env.INFRA_DIR }}
 
             echo "--- Atualizando a imagem do serviço --"
-            docker compose -f docker-compose-production.yml pull report-service
+            docker compose -f docker-compose-production.yml pull reports-service
 
             echo "--- Recriando o contêiner do serviço ---"
-            docker compose -f docker-compose-production.yml up -d --force-recreate --no-deps report-service
+            docker compose -f docker-compose-production.yml up -d --force-recreate --no-deps reports-service
 
             echo "--- Limpando imagens antigas ---"
             docker image prune -af
