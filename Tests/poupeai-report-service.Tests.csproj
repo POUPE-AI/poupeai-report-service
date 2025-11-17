@@ -23,7 +23,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\src\poupeai-report-service.csproj" />
+    <ProjectReference Include="..\Src\poupeai-report-service.csproj" />
   </ItemGroup>
 
   <ItemGroup>
