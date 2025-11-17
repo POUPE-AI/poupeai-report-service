@@ -4,7 +4,7 @@ using Microsoft.OpenApi.Attributes;
 
 namespace poupeai_report_service.Enums;
 
-internal enum AIModel : byte
+public enum AIModel : byte
 {
     [Description("Deepseek AI")]
     [EnumMember(Value = "deepseek")]

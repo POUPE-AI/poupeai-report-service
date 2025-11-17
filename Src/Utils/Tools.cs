@@ -5,7 +5,7 @@ using Serilog;
 
 namespace poupeai_report_service.Utils;
 
-internal static class Tools
+public static class Tools
 {
     private static string GetSchemaPath(string schemaName)
     {
