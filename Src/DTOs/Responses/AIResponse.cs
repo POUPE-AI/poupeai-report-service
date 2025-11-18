@@ -6,7 +6,7 @@ namespace poupeai_report_service.DTOs.Responses;
 /// Representa o cabeçalho de uma resposta HTTP.
 /// Contém informações sobre o status da resposta e uma mensagem opcional.
 /// </summary>
-internal record Header {
+public record Header {
     /// <summary>
     /// O status da resposta HTTP.
     /// </summary>
@@ -25,7 +25,7 @@ internal record Header {
 /// Esta classe é usada para encapsular a resposta de um serviço de IA, incluindo o modelo utilizado,
 /// </summary>
 /// <typeparam name="TContent">Tipo do conteúdo da resposta.</typeparam>
-internal record AIResponse<TContent>
+public record AIResponse<TContent>
 {
     /// <summary>
     /// O cabeçalho da resposta, contendo informações sobre o status e mensagem.

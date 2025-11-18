@@ -135,5 +135,15 @@ $RECYCLE.BIN/
 # VS Code settings
 .history/
 
+# Test Coverage
+coverage-output/
+coverage-report/
+*.coverage
+*.coveragexml
+coverage.cobertura.xml
+
+# Test Results
+TestResults/
+
 appsettings.Development.json
 appsettings.Production.json
