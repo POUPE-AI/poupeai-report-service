@@ -4,6 +4,7 @@ using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using poupeai_report_service.Database;
 using poupeai_report_service.Interfaces;
+using poupeai_report_service.Middleware;
 using poupeai_report_service.Routes;
 using poupeai_report_service.Services;
 using poupeai_report_service.Services.AI;
@@ -42,7 +43,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         {
             OnAuthenticationFailed = context =>
             {
-                Log.Error("Authentication failed: {Error}", context.Exception.Message);
+                Log.Error(context.Exception, "Authentication failed");
                 return Task.CompletedTask;
             },
             OnTokenValidated = context =>
@@ -111,6 +112,8 @@ builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<InsightService>();
 
 var app = builder.Build();
+
+app.UseCorrelationId();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -86,7 +86,7 @@ namespace poupeai_report_service.Services
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, $"Failed to fetch category name for category id {categoryId}");
+                Log.Warning(ex, "Failed to fetch category name for category id {CategoryId}", categoryId);
             }
             return categoryId.ToString();
         }
