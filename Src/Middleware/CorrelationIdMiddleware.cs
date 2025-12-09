@@ -30,9 +30,9 @@ public class CorrelationIdMiddleware
         using (LogContext.PushProperty("trace.correlation_id", correlationId))
         {
             // Adiciona também user.id se disponível
-            var userId = context.User?.FindFirst("sub")?.Value 
+            var userId = context.User?.FindFirst("sub")?.Value
                       ?? context.User?.FindFirst("preferred_username")?.Value;
-            
+
             if (!string.IsNullOrEmpty(userId))
             {
                 using (LogContext.PushProperty("user.id", userId))
