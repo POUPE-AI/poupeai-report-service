@@ -108,6 +108,8 @@ Este documento descreve a estrutura de testes e como executá-los.
 | RS-UT-098 | DTOs (InsightReportResponse) | Verificar InsightReportResponse estrutura | Pendente |
 | RS-UT-099 | DTOs (OverviewReportResponse) | Verificar OverviewReportResponse estrutura | Pendente |
 | RS-UT-100 | DTOs (TransactionReportResponse) | Verificar TransactionReportResponse estrutura | Pendente |
+| RS-UT-101 | Middleware (CorrelationId) | Verificar uso de Correlation ID existente no header | Implementado e Passando (8 testes) |
+| RS-UT-102 | Logging (Structured) | Verificar logging estruturado com Serilog | Implementado e Passando (10 testes) |
 
 ### Testes de Integração (Integration Tests)
 

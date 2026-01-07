@@ -49,7 +49,7 @@ public static class Tools
 
             // Log first 100 characters for debugging
             var preview = json.Length > 100 ? json.Substring(0, 100) + "..." : json;
-            Log.Information($"Attempting to deserialize JSON: {preview}");
+            Log.Information("Attempting to deserialize JSON: {JsonPreview}", preview);
 
             return JsonSerializer.Deserialize<AIResponse<T>>(json);
         }
