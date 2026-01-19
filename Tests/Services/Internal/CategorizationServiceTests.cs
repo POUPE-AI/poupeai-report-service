@@ -33,29 +33,15 @@ public class CategorizationServiceTests
         // Arrange
         var request = new CategorizationRequest
         {
-            Transactions = new List<Transaction>
+            Descriptions = new List<string>
             {
-                new()
-                {
-                    Id = 1,
-                    Description = "Compra no supermercado",
-                    Amount = -150.50m,
-                    Type = "Despesa",
-                    Date = DateTime.UtcNow
-                },
-                new()
-                {
-                    Id = 2,
-                    Description = "Salário mensal",
-                    Amount = 5000m,
-                    Type = "Receita",
-                    Date = DateTime.UtcNow
-                }
+                "UBER *VIAGEM",
+                "IFOOD *PAGAMENTO"
             },
-            AvailableCategories = new List<AvailableCategory>
+            UserCategories = new List<UserCategory>
             {
-                new() { Id = "cat-1", Name = "Alimentação", Description = "Gastos com comida" },
-                new() { Id = "cat-2", Name = "Salário", Description = "Receitas de trabalho" }
+                new() { Id = "uuid-1111", Name = "Transporte" },
+                new() { Id = "uuid-2222", Name = "Alimentação" }
             }
         };
 
@@ -64,10 +50,10 @@ public class CategorizationServiceTests
             Header = new Header { Status = 200, Message = "Sucesso" },
             Content = new CategorizationResponse
             {
-                Categorizations = new Dictionary<string, string>
+                Categorizations = new List<Categorization>
                 {
-                    { "Compra no supermercado", "cat-1" },
-                    { "Salário mensal", "cat-2" }
+                    new() { Description = "UBER *VIAGEM", CategoryId = "uuid-1111" },
+                    new() { Description = "IFOOD *PAGAMENTO", CategoryId = "uuid-2222" }
                 }
             }
         };
@@ -111,22 +97,24 @@ public class CategorizationServiceTests
 
         content.Should().NotBeNull();
         content!.Categorizations.Should().HaveCount(2);
-        content.Categorizations.Should().ContainKey("Compra no supermercado");
-        content.Categorizations.Should().ContainKey("Salário mensal");
+        content.Categorizations[0].Description.Should().Be("UBER *VIAGEM");
+        content.Categorizations[0].CategoryId.Should().Be("uuid-1111");
+        content.Categorizations[1].Description.Should().Be("IFOOD *PAGAMENTO");
+        content.Categorizations[1].CategoryId.Should().Be("uuid-2222");
     }
 
     [Fact]
     [Trait("Category", "Unit")]
     [Trait("TestCase", "RS-UT-009")]
-    public async Task CategorizeTransactionsAsync_WithEmptyTransactions_ShouldReturnBadRequest()
+    public async Task CategorizeTransactionsAsync_WithEmptyDescriptions_ShouldReturnBadRequest()
     {
         // Arrange
         var request = new CategorizationRequest
         {
-            Transactions = new List<Transaction>(),
-            AvailableCategories = new List<AvailableCategory>
+            Descriptions = new List<string>(),
+            UserCategories = new List<UserCategory>
             {
-                new() { Id = "cat-1", Name = "Alimentação", Description = "Gastos com comida" }
+                new() { Id = "uuid-1111", Name = "Transporte" }
             }
         };
 
@@ -162,7 +150,7 @@ public class CategorizationServiceTests
                 var message = messageProp!.GetValue(header) as string;
 
                 status.Should().Be(400);
-                message.Should().Contain("transação");
+                message.Should().Contain("descrição");
             }
         }
     }
@@ -170,15 +158,15 @@ public class CategorizationServiceTests
     [Fact]
     [Trait("Category", "Unit")]
     [Trait("TestCase", "RS-UT-009")]
-    public async Task CategorizeTransactionsAsync_WithNullTransactions_ShouldReturnBadRequest()
+    public async Task CategorizeTransactionsAsync_WithNullDescriptions_ShouldReturnBadRequest()
     {
         // Arrange
         var request = new CategorizationRequest
         {
-            Transactions = null!,
-            AvailableCategories = new List<AvailableCategory>
+            Descriptions = null!,
+            UserCategories = new List<UserCategory>
             {
-                new() { Id = "cat-1", Name = "Alimentação", Description = "Gastos com comida" }
+                new() { Id = "uuid-1111", Name = "Transporte" }
             }
         };
 
@@ -205,18 +193,11 @@ public class CategorizationServiceTests
         // Arrange
         var request = new CategorizationRequest
         {
-            Transactions = new List<Transaction>
+            Descriptions = new List<string>
             {
-                new()
-                {
-                    Id = 1,
-                    Description = "Compra no supermercado",
-                    Amount = -150.50m,
-                    Type = "Despesa",
-                    Date = DateTime.UtcNow
-                }
+                "UBER *VIAGEM"
             },
-            AvailableCategories = new List<AvailableCategory>()
+            UserCategories = new List<UserCategory>()
         };
 
         // Act
@@ -259,18 +240,11 @@ public class CategorizationServiceTests
         // Arrange
         var request = new CategorizationRequest
         {
-            Transactions = new List<Transaction>
+            Descriptions = new List<string>
             {
-                new()
-                {
-                    Id = 1,
-                    Description = "Compra no supermercado",
-                    Amount = -150.50m,
-                    Type = "Despesa",
-                    Date = DateTime.UtcNow
-                }
+                "UBER *VIAGEM"
             },
-            AvailableCategories = null!
+            UserCategories = null!
         };
 
         // Act
@@ -296,20 +270,13 @@ public class CategorizationServiceTests
         // Arrange
         var request = new CategorizationRequest
         {
-            Transactions = new List<Transaction>
+            Descriptions = new List<string>
             {
-                new()
-                {
-                    Id = 1,
-                    Description = "Compra no supermercado",
-                    Amount = -150.50m,
-                    Type = "Despesa",
-                    Date = DateTime.UtcNow
-                }
+                "UBER *VIAGEM"
             },
-            AvailableCategories = new List<AvailableCategory>
+            UserCategories = new List<UserCategory>
             {
-                new() { Id = "cat-1", Name = "Alimentação", Description = "Gastos com comida" }
+                new() { Id = "uuid-1111", Name = "Transporte" }
             }
         };
 
@@ -339,20 +306,13 @@ public class CategorizationServiceTests
         // Arrange
         var request = new CategorizationRequest
         {
-            Transactions = new List<Transaction>
+            Descriptions = new List<string>
             {
-                new()
-                {
-                    Id = 1,
-                    Description = "Compra no supermercado",
-                    Amount = -150.50m,
-                    Type = "Despesa",
-                    Date = DateTime.UtcNow
-                }
+                "UBER *VIAGEM"
             },
-            AvailableCategories = new List<AvailableCategory>
+            UserCategories = new List<UserCategory>
             {
-                new() { Id = "cat-1", Name = "Alimentação", Description = "Gastos com comida" }
+                new() { Id = "uuid-1111", Name = "Transporte" }
             }
         };
 
@@ -382,20 +342,13 @@ public class CategorizationServiceTests
         // Arrange
         var request = new CategorizationRequest
         {
-            Transactions = new List<Transaction>
+            Descriptions = new List<string>
             {
-                new()
-                {
-                    Id = 1,
-                    Description = "Compra no supermercado",
-                    Amount = -150.50m,
-                    Type = "Despesa",
-                    Date = DateTime.UtcNow
-                }
+                "UBER *VIAGEM"
             },
-            AvailableCategories = new List<AvailableCategory>
+            UserCategories = new List<UserCategory>
             {
-                new() { Id = "cat-1", Name = "Alimentação", Description = "Gastos com comida" }
+                new() { Id = "uuid-1111", Name = "Transporte" }
             }
         };
 
@@ -431,20 +384,13 @@ public class CategorizationServiceTests
         // Arrange
         var request = new CategorizationRequest
         {
-            Transactions = new List<Transaction>
+            Descriptions = new List<string>
             {
-                new()
-                {
-                    Id = 1,
-                    Description = "Compra no supermercado",
-                    Amount = -150.50m,
-                    Type = "Despesa",
-                    Date = DateTime.UtcNow
-                }
+                "UBER *VIAGEM"
             },
-            AvailableCategories = new List<AvailableCategory>
+            UserCategories = new List<UserCategory>
             {
-                new() { Id = "cat-1", Name = "Alimentação", Description = "Gastos com comida" }
+                new() { Id = "uuid-1111", Name = "Transporte" }
             }
         };
 
@@ -480,20 +426,13 @@ public class CategorizationServiceTests
         // Arrange
         var request = new CategorizationRequest
         {
-            Transactions = new List<Transaction>
+            Descriptions = new List<string>
             {
-                new()
-                {
-                    Id = 1,
-                    Description = "Compra no supermercado",
-                    Amount = -150.50m,
-                    Type = "Despesa",
-                    Date = DateTime.UtcNow
-                }
+                "UBER *VIAGEM"
             },
-            AvailableCategories = new List<AvailableCategory>
+            UserCategories = new List<UserCategory>
             {
-                new() { Id = "cat-1", Name = "Alimentação", Description = "Gastos com comida" }
+                new() { Id = "uuid-1111", Name = "Transporte" }
             }
         };
 
@@ -532,20 +471,13 @@ public class CategorizationServiceTests
         // Arrange
         var request = new CategorizationRequest
         {
-            Transactions = new List<Transaction>
+            Descriptions = new List<string>
             {
-                new()
-                {
-                    Id = 1,
-                    Description = "Compra no supermercado",
-                    Amount = -150.50m,
-                    Type = "Despesa",
-                    Date = DateTime.UtcNow
-                }
+                "UBER *VIAGEM"
             },
-            AvailableCategories = new List<AvailableCategory>
+            UserCategories = new List<UserCategory>
             {
-                new() { Id = "cat-1", Name = "Alimentação", Description = "Gastos com comida" }
+                new() { Id = "uuid-1111", Name = "Transporte" }
             }
         };
 
@@ -575,20 +507,13 @@ public class CategorizationServiceTests
         // Arrange
         var request = new CategorizationRequest
         {
-            Transactions = new List<Transaction>
+            Descriptions = new List<string>
             {
-                new()
-                {
-                    Id = 1,
-                    Description = "Compra no supermercado",
-                    Amount = -150.50m,
-                    Type = "Despesa",
-                    Date = DateTime.UtcNow
-                }
+                "UBER *VIAGEM"
             },
-            AvailableCategories = new List<AvailableCategory>
+            UserCategories = new List<UserCategory>
             {
-                new() { Id = "cat-1", Name = "Alimentação", Description = "Gastos com comida" }
+                new() { Id = "uuid-1111", Name = "Transporte" }
             }
         };
 
@@ -597,9 +522,9 @@ public class CategorizationServiceTests
             Header = new Header { Status = 200, Message = "Sucesso" },
             Content = new CategorizationResponse
             {
-                Categorizations = new Dictionary<string, string>
+                Categorizations = new List<Categorization>
                 {
-                    { "Compra no supermercado", "cat-1" }
+                    new() { Description = "UBER *VIAGEM", CategoryId = "uuid-1111" }
                 }
             }
         };
@@ -631,8 +556,8 @@ public class CategorizationServiceTests
         // Arrange
         var dataJson = JsonSerializer.Serialize(new
         {
-            transactions = new[] { new { description = "Test", amount = 100, type = "Despesa" } },
-            available_categories = new[] { new { id = "cat-1", name = "Test", description = "Test" } }
+            descriptions = new[] { "UBER *VIAGEM", "IFOOD *PAGAMENTO" },
+            user_categories = new[] { new { id = "uuid-1111", name = "Transporte" } }
         });
 
         // Act
@@ -648,32 +573,27 @@ public class CategorizationServiceTests
         prompt.Should().Contain("categorizar");
         prompt.Should().Contain("categoria");
         prompt.Should().Contain("NUNCA invente");
-        prompt.Should().Contain("descricao_transacao");
-        prompt.Should().Contain("id_categoria");
+        prompt.Should().Contain("description");
+        prompt.Should().Contain("category_id");
     }
 
     [Fact]
     [Trait("Category", "Unit")]
     [Trait("TestCase", "RS-UT-009")]
-    public async Task CategorizeTransactionsAsync_ShouldSerializeTransactionsCorrectly()
+    public async Task CategorizeTransactionsAsync_ShouldSerializeDescriptionsCorrectly()
     {
         // Arrange
         var request = new CategorizationRequest
         {
-            Transactions = new List<Transaction>
+            Descriptions = new List<string>
             {
-                new()
-                {
-                    Id = 1,
-                    Description = "Compra específica",
-                    Amount = -250.75m,
-                    Type = "Despesa",
-                    Date = DateTime.UtcNow
-                }
+                "POSTO IPIRANGA",
+                "NETFLIX.COM"
             },
-            AvailableCategories = new List<AvailableCategory>
+            UserCategories = new List<UserCategory>
             {
-                new() { Id = "cat-1", Name = "Alimentação", Description = "Gastos com comida" }
+                new() { Id = "uuid-3333", Name = "Lazer" },
+                new() { Id = "uuid-5555", Name = "Combustível" }
             }
         };
 
@@ -682,9 +602,10 @@ public class CategorizationServiceTests
             Header = new Header { Status = 200, Message = "Sucesso" },
             Content = new CategorizationResponse
             {
-                Categorizations = new Dictionary<string, string>
+                Categorizations = new List<Categorization>
                 {
-                    { "Compra específica", "cat-1" }
+                    new() { Description = "POSTO IPIRANGA", CategoryId = "uuid-5555" },
+                    new() { Description = "NETFLIX.COM", CategoryId = "uuid-3333" }
                 }
             }
         };
@@ -704,10 +625,10 @@ public class CategorizationServiceTests
 
         // Assert
         capturedPrompt.Should().NotBeNull();
-        capturedPrompt.Should().Contain("Compra espec");
-        capturedPrompt.Should().Contain("-250.75");
-        capturedPrompt.Should().Contain("Despesa");
-        capturedPrompt.Should().Contain("Alimenta");
+        capturedPrompt.Should().Contain("POSTO IPIRANGA");
+        capturedPrompt.Should().Contain("NETFLIX.COM");
+        capturedPrompt.Should().Contain("Lazer");
+        capturedPrompt.Should().Contain("Combust");
     }
 }
 

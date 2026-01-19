@@ -110,6 +110,7 @@ builder.Services.AddScoped<SavingsEstimateService>();
 
 builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<InsightService>();
+builder.Services.AddScoped<poupeai_report_service.Services.Internal.CategorizationService>();
 
 var app = builder.Build();
 
@@ -139,5 +140,6 @@ api_group.MapGet("", () => Results.Ok(new
 
 app.MapReportsRoutes();
 app.MapSavingsRoutes();
+app.MapCategorizationRoutes();
 
 app.Run();

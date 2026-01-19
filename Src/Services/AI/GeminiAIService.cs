@@ -1,4 +1,6 @@
 using System.Text.Json;
+using Google.GenAI;
+using Google.GenAI.Types;
 using poupeai_report_service.DTOs.Responses;
 using poupeai_report_service.Enums;
 using poupeai_report_service.Interfaces;
@@ -6,12 +8,11 @@ using poupeai_report_service.Utils;
 
 namespace poupeai_report_service.Services.AI;
 
-internal class GeminiAIService(IConfiguration configuration, HttpClient httpClient, ILogger<GeminiAIService> logger) : IAIService
+internal class GeminiAIService(IConfiguration configuration, ILogger<GeminiAIService> logger) : IAIService
 {
-    private readonly HttpClient _httpClient = httpClient;
     private readonly string _apiKey = configuration["GeminiAI:ApiKey"] ?? throw new ArgumentNullException(nameof(configuration), "API Key is not configured.");
     private readonly ILogger<GeminiAIService> _logger = logger;
-    private const string BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+    private const string MODEL_NAME = "gemini-3-flash-preview";
 
     public async Task<string> GenerateReportAsync(string prompt, string output, AIModel model = AIModel.Gemini)
     {
@@ -28,65 +29,74 @@ internal class GeminiAIService(IConfiguration configuration, HttpClient httpClie
                 if (model != AIModel.Gemini)
                     throw new ArgumentOutOfRangeException(nameof(model), model, "Invalid AI model specified.");
 
-                var url = $"{BASE_URL}?key={_apiKey}";
+                var client = new Client(apiKey: _apiKey);
 
-                var requestBody = new
+                // Configurar a resposta estruturada com JSON schema
+                var config = new GenerateContentConfig
                 {
-                    contents = new[]
-                    {
-                        new
-                        {
-                            parts = new[]
-                            {
-                                new { text = prompt }
-                            }
-                        }
-                    },
-                    generationConfig = new
-                    {
-                        responseMimeType = "application/json",
-                        responseSchema = JsonSerializer.Deserialize<object>(output)
-                    },
+                    ResponseMimeType = "application/json",
+                    ResponseSchema = Schema.FromJson(output)
                 };
 
-                var response = await _httpClient.PostAsJsonAsync(url, requestBody);
+                var response = await client.Models.GenerateContentAsync(
+                    model: MODEL_NAME,
+                    contents: prompt,
+                    config: config
+                );
 
-                if (!response.IsSuccessStatusCode)
+                if (response?.Candidates == null || response.Candidates.Count == 0)
                 {
-                    var errorContent = await response.Content.ReadAsStringAsync();
-                    _logger.LogWarning("Request error: {StatusCode} - {ErrorContent}", response.StatusCode, errorContent);
-                    
-                    if ((response.StatusCode == System.Net.HttpStatusCode.ServiceUnavailable || 
-                         response.StatusCode == System.Net.HttpStatusCode.TooManyRequests) && 
-                         attempt < maxRetries)
-                    {
-                        var delay = baseDelayMs * (int)Math.Pow(2, attempt - 1);
-                        _logger.LogInformation("Retrying in {Delay}ms...", delay);
-                        await Task.Delay(delay);
-                        continue;
-                    }
-                    
-                    return Tools.CreateErrorResponse($"API returned {response.StatusCode}: {response.ReasonPhrase}");
+                    throw new Exception("No candidates returned from Gemini AI.");
                 }
 
-                var result = await response.Content.ReadFromJsonAsync<GeminiResponse>();
-                return result?.candidates?[0]?.content?.parts?[0]?.text ?? throw new Exception("No content returned from Gemini AI.");
+                var candidate = response.Candidates[0];
+
+                if (candidate.Content?.Parts == null || candidate.Content.Parts.Count == 0)
+                {
+                    throw new Exception("No content parts returned from Gemini AI.");
+                }
+
+                var text = candidate.Content.Parts[0].Text;
+
+                if (string.IsNullOrWhiteSpace(text))
+                {
+                    throw new Exception("Empty text returned from Gemini AI.");
+                }
+
+                return text;
             }
-            catch (HttpRequestException ex) when (attempt < maxRetries)
+            catch (Exception ex) when (
+                (ex.Message.Contains("429") ||
+                 ex.Message.Contains("TooManyRequests") ||
+                 ex.Message.Contains("Quota exceeded") ||
+                 ex.Message.Contains("quota") ||
+                 ex.Message.Contains("503") ||
+                 ex.Message.Contains("ServiceUnavailable")) &&
+                 attempt < maxRetries)
             {
-                _logger.LogWarning(ex, "HTTP request error on attempt {Attempt}: {Message}", attempt, ex.Message);
-                var delay = baseDelayMs * (int)Math.Pow(2, attempt - 1);
+                _logger.LogWarning(ex, "Rate limit or service error on attempt {Attempt}: {Message}", attempt, ex.Message);
+
+                // Se for erro de quota, usar delay maior (mínimo 20 segundos)
+                var delay = ex.Message.Contains("Quota") || ex.Message.Contains("quota")
+                    ? Math.Max(20000, baseDelayMs * (int)Math.Pow(2, attempt))
+                    : baseDelayMs * (int)Math.Pow(2, attempt - 1);
+
+                _logger.LogInformation("Retrying in {Delay}ms...", delay);
                 await Task.Delay(delay);
                 continue;
-            }
-            catch (HttpRequestException ex)
-            {
-                _logger.LogError(ex, "Request error: {Message}", ex.Message);
-                return Tools.CreateErrorResponse($"Communication error: {ex.Message}");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error on generating report: {Message}", ex.Message);
+
+                if (attempt < maxRetries)
+                {
+                    var delay = baseDelayMs * (int)Math.Pow(2, attempt - 1);
+                    _logger.LogInformation("Retrying in {Delay}ms...", delay);
+                    await Task.Delay(delay);
+                    continue;
+                }
+
                 return Tools.CreateErrorResponse($"Error generating report: {ex.Message}");
             }
         }
