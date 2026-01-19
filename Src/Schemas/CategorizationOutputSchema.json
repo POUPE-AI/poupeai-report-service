@@ -1,0 +1,37 @@
+{
+    "type": "object",
+    "properties": {
+        "header": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "status"
+            ]
+        },
+        "content": {
+            "type": "object",
+            "properties": {
+                "categorizations": {
+                    "type": "object",
+                    "additionalProperties": {
+                        "type": "string"
+                    },
+                    "description": "Mapeamento de descrição da transação para ID da categoria"
+                }
+            },
+            "required": [
+                "categorizations"
+            ]
+        }
+    },
+    "required": [
+        "header"
+    ]
+}
