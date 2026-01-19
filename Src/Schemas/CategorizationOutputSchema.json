@@ -19,11 +19,23 @@
             "type": "object",
             "properties": {
                 "categorizations": {
-                    "type": "object",
-                    "additionalProperties": {
-                        "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "description": {
+                                "type": "string"
+                            },
+                            "category_id": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "description",
+                            "category_id"
+                        ]
                     },
-                    "description": "Mapeamento de descrição da transação para ID da categoria"
+                    "description": "Lista de categorizações com descrição e ID da categoria correspondente"
                 }
             },
             "required": [

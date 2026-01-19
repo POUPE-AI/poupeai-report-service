@@ -38,20 +38,20 @@ internal class CategorizationService
     {
         try
         {
-            if (request.Transactions == null || request.Transactions.Count == 0)
+            if (request.Descriptions == null || request.Descriptions.Count == 0)
             {
-                _logger.Warning("No transactions provided for categorization.");
+                _logger.Warning("No descriptions provided for categorization.");
                 return Results.BadRequest(new
                 {
                     Header = new
                     {
                         Status = 400,
-                        Message = "Nenhuma transação fornecida para categorização."
+                        Message = "Nenhuma descrição fornecida para categorização."
                     }
                 });
             }
 
-            if (request.AvailableCategories == null || request.AvailableCategories.Count == 0)
+            if (request.UserCategories == null || request.UserCategories.Count == 0)
             {
                 _logger.Warning("No categories provided for categorization.");
                 return Results.BadRequest(new
@@ -66,24 +66,18 @@ internal class CategorizationService
 
             var dataJson = JsonSerializer.Serialize(new
             {
-                transactions = request.Transactions.Select(t => new
-                {
-                    description = t.Description,
-                    amount = t.Amount,
-                    type = t.Type
-                }),
-                available_categories = request.AvailableCategories.Select(c => new
+                descriptions = request.Descriptions,
+                user_categories = request.UserCategories.Select(c => new
                 {
                     id = c.Id,
-                    name = c.Name,
-                    description = c.Description
+                    name = c.Name
                 })
             });
 
             var prompt = BuildPrompt(dataJson);
 
-            _logger.Information("Generating categorization using {Model} model for {TransactionCount} transactions and {CategoryCount} categories",
-                Tools.ModelToString(model), request.Transactions.Count, request.AvailableCategories.Count);
+            _logger.Information("Generating categorization using {Model} model for {DescriptionCount} descriptions and {CategoryCount} categories",
+                Tools.ModelToString(model), request.Descriptions.Count, request.UserCategories.Count);
 
             var result = await aiService.GenerateReportAsync(prompt, _outputSchema, model);
 
@@ -149,27 +143,27 @@ internal class CategorizationService
         return $@"
             Você é um assistente de IA especializado em classificação financeira.
             
-            Sua tarefa é categorizar cada transação fornecida escolhendo ESTRITAMENTE uma das categorias disponíveis.
+            Sua tarefa é categorizar cada descrição fornecida escolhendo ESTRITAMENTE uma das categorias disponíveis.
             
             Dados fornecidos (em formato JSON):
             {dataJson}
             
             INSTRUÇÕES IMPORTANTES:
-            1. Para cada transação, analise a descrição, o valor e o tipo (Receita/Despesa).
-            2. Escolha a categoria mais apropriada da lista de categorias disponíveis (available_categories).
+            1. Para cada descrição, analise o texto e identifique a categoria mais apropriada.
+            2. Escolha a categoria mais apropriada da lista de categorias disponíveis (user_categories).
             3. Você DEVE escolher apenas categorias que estão na lista fornecida - NUNCA invente ou crie novas categorias.
-            4. Retorne um JSON mapeando a descrição de cada transação para o ID da categoria escolhida.
-            5. O formato deve ser: {{ ""descricao_transacao"": ""id_categoria"" }}
+            4. Retorne um array JSON com objetos contendo a descrição original e o ID da categoria escolhida.
+            5. O formato deve ser: [{{ ""description"": ""texto_descricao"", ""category_id"": ""id_categoria"" }}]
             6. Se uma descrição não se encaixar perfeitamente em nenhuma categoria, escolha a mais próxima ou genérica.
-            7. TODAS as transações fornecidas devem ter uma categoria atribuída.
+            7. TODAS as descrições fornecidas devem ter uma categoria atribuída.
             
             Exemplo de resposta esperada:
             {{
-              ""categorizations"": {{
-                ""Compra no mercado"": ""cat-123"",
-                ""Salário mensal"": ""cat-456"",
-                ""Conta de luz"": ""cat-789""
-              }}
+              ""categorizations"": [
+                {{ ""description"": ""UBER *VIAGEM"", ""category_id"": ""uuid-1111"" }},
+                {{ ""description"": ""IFOOD *PAGAMENTO"", ""category_id"": ""uuid-2222"" }},
+                {{ ""description"": ""NETFLIX.COM"", ""category_id"": ""uuid-3333"" }}
+              ]
             }}
             ";
     }

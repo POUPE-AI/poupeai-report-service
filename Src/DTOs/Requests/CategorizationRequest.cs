@@ -1,20 +1,20 @@
 using System.ComponentModel;
+using System.Text.Json.Serialization;
 
 namespace poupeai_report_service.DTOs.Requests;
 
 /// <summary>
 /// Representa uma categoria disponível para classificação.
 /// </summary>
-internal record AvailableCategory
+internal record UserCategory
 {
     [Description("ID da categoria.")]
+    [JsonPropertyName("id")]
     public string Id { get; set; } = null!;
 
     [Description("Nome da categoria.")]
+    [JsonPropertyName("name")]
     public string Name { get; set; } = null!;
-
-    [Description("Descrição da categoria.")]
-    public string? Description { get; set; }
 }
 
 /// <summary>
@@ -22,9 +22,11 @@ internal record AvailableCategory
 /// </summary>
 internal record CategorizationRequest
 {
-    [Description("Lista de transações a serem categorizadas.")]
-    public List<Transaction> Transactions { get; set; } = [];
+    [Description("Lista de descrições a serem categorizadas.")]
+    [JsonPropertyName("descriptions")]
+    public List<string> Descriptions { get; set; } = [];
 
     [Description("Lista de categorias disponíveis para classificação.")]
-    public List<AvailableCategory> AvailableCategories { get; set; } = [];
+    [JsonPropertyName("userCategories")]
+    public List<UserCategory> UserCategories { get; set; } = [];
 }
