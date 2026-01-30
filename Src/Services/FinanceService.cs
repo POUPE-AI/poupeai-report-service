@@ -67,16 +67,14 @@ namespace poupeai_report_service.Services
 
             var transactions = new List<Transaction>();
 
-            // Support new API (Content) and fallback to older Results
-            var items = transactionsResponse?.Content ?? transactionsResponse?.Results ?? new List<TransactionResponse>();
+            var items = transactionsResponse?.Content ?? [];
 
             foreach (var item in items)
             {
-                // Category name is provided in transaction payload (new core-service). Prefer category.name if present; else fallback to string value.
                 string categoryName = string.Empty;
                 try
                 {
-                    if (item.Category.ValueKind == System.Text.Json.JsonValueKind.Object)
+                    if (item.Category.ValueKind == JsonValueKind.Object)
                     {
                         if (item.Category.TryGetProperty("name", out var nameProp))
                         {
@@ -84,17 +82,8 @@ namespace poupeai_report_service.Services
                         }
                         else if (item.Category.TryGetProperty("id", out var idProp))
                         {
-                            // use id as fallback (stringify)
-                            categoryName = idProp.ToString().Trim('"');
+                            categoryName = idProp.GetString() ?? string.Empty;
                         }
-                    }
-                    else if (item.Category.ValueKind == System.Text.Json.JsonValueKind.String)
-                    {
-                        categoryName = item.Category.GetString() ?? string.Empty;
-                    }
-                    else if (item.Category.ValueKind == System.Text.Json.JsonValueKind.Number)
-                    {
-                        categoryName = item.Category.ToString();
                     }
                 }
                 catch (Exception ex)
@@ -102,15 +91,10 @@ namespace poupeai_report_service.Services
                     Log.Warning(ex, "Failed to parse category value from transaction payload");
                 }
 
-                // Parse date: prefer transactionDate, fallback to issue_date
                 DateTime date;
                 if (!string.IsNullOrEmpty(item.TransactionDate) && DateTime.TryParse(item.TransactionDate, out var parsed))
                 {
                     date = parsed;
-                }
-                else if (item.IssueDate.HasValue)
-                {
-                    date = item.IssueDate.Value.ToDateTime(TimeOnly.MinValue);
                 }
                 else
                 {

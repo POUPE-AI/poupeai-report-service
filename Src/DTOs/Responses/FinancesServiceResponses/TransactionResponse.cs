@@ -6,7 +6,7 @@ namespace poupeai_report_service.DTOs.Responses.FinancesServiceResponses
     internal record TransactionResponse
     {
         [JsonPropertyName("id")]
-        public string Id { get; init; } = null!; // accepts UUID or numeric ids
+        public string Id { get; init; } = null!;
 
         [JsonPropertyName("description")]
         public string? Description { get; init; }
@@ -14,12 +14,8 @@ namespace poupeai_report_service.DTOs.Responses.FinancesServiceResponses
         [JsonPropertyName("amount")]
         public decimal Amount { get; init; }
 
-        // New core-service returns "transactionDate" (e.g. "2026-01-30"). Keep old "issue_date" for backward compatibility.
         [JsonPropertyName("transactionDate")]
         public string? TransactionDate { get; init; }
-
-        [JsonPropertyName("issue_date")]
-        public DateOnly? IssueDate { get; init; }
 
         [JsonPropertyName("type")]
         public string? Type { get; init; }
@@ -30,7 +26,6 @@ namespace poupeai_report_service.DTOs.Responses.FinancesServiceResponses
         [JsonPropertyName("creditCardId")]
         public string? CreditCardId { get; init; }
 
-        // The "category" field can be an object (new API) or a numeric id (old API).
         [JsonPropertyName("category")]
         public JsonElement Category { get; init; }
 
@@ -69,9 +64,5 @@ namespace poupeai_report_service.DTOs.Responses.FinancesServiceResponses
 
         [JsonPropertyName("totalPages")]
         public int TotalPages { get; init; }
-
-        // Backwards compatibility with older Django-like APIs
-        [JsonPropertyName("results")]
-        public List<TransactionResponse>? Results { get; init; }
     }
 }
