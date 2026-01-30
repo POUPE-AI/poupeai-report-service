@@ -18,7 +18,7 @@ public class HashTests
     {
         var transaction1 = new Transaction
         {
-            Id = 1,
+            Id = "1",
             Amount = 100.50m,
             Date = new DateTime(2024, 10, 15),
             Description = "Compra no Supermercado",
@@ -27,7 +27,7 @@ public class HashTests
 
         var transaction2 = new Transaction
         {
-            Id = 1,
+            Id = "1",
             Amount = 100.50m,
             Date = new DateTime(2024, 10, 15),
             Description = "Compra no Supermercado",
@@ -69,7 +69,7 @@ public class HashTests
             EndDate = new DateOnly(2024, 10, 31),
             Transactions = new List<Transaction>
             {
-                new() { Id = 1, Amount = 100.50m, Date = DateTime.Now, Description = "Transação 1", Category = "Alimentação" }
+                new() { Id = "1", Amount = 100.50m, Date = DateTime.Now, Description = "Transação 1", Category = "Alimentação" }
             }
         };
 
@@ -80,7 +80,7 @@ public class HashTests
             EndDate = new DateOnly(2024, 10, 31),
             Transactions = new List<Transaction>
             {
-                new() { Id = 2, Amount = 100.50m, Date = DateTime.Now, Description = "Transação 2", Category = "Alimentação" }
+                new() { Id = "2", Amount = 100.50m, Date = DateTime.Now, Description = "Transação 2", Category = "Alimentação" }
             }
         };
 
@@ -102,7 +102,7 @@ public class HashTests
             EndDate = new DateOnly(2024, 10, 31),
             Transactions = new List<Transaction>
             {
-                new() { Id = 1, Amount = 100.50m, Date = DateTime.Now, Description = "Transação 1", Category = "Alimentação" }
+                new() { Id = "1", Amount = 100.50m, Date = DateTime.Now, Description = "Transação 1", Category = "Alimentação" }
             }
         };
 

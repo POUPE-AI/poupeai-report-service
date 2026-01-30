@@ -18,12 +18,12 @@ public class SavingsEstimateServiceTests
     {
         var transactions = new List<Transaction>
         {
-            new() { Id = 1, Amount = -50.00m, Date = new DateTime(2024, 10, 15), Description = "Compra Outubro", Category = "Alimentação" },
-            new() { Id = 2, Amount = -75.00m, Date = new DateTime(2024, 10, 20), Description = "Compra Outubro 2", Category = "Transporte" },
-            new() { Id = 3, Amount = 1000.00m, Date = new DateTime(2024, 10, 5), Description = "Salário Outubro", Category = "Receita" },
-            new() { Id = 4, Amount = -100.00m, Date = new DateTime(2024, 9, 10), Description = "Compra Setembro", Category = "Alimentação" },
-            new() { Id = 5, Amount = -25.00m, Date = new DateTime(2024, 9, 25), Description = "Compra Setembro 2", Category = "Compras" },
-            new() { Id = 6, Amount = 1000.00m, Date = new DateTime(2024, 9, 1), Description = "Salário Setembro", Category = "Receita" }
+            new() { Id = "1", Amount = -50.00m, Date = new DateTime(2024, 10, 15), Description = "Compra Outubro", Category = "Alimentação" },
+            new() { Id = "2", Amount = -75.00m, Date = new DateTime(2024, 10, 20), Description = "Compra Outubro 2", Category = "Transporte" },
+            new() { Id = "3", Amount = 1000.00m, Date = new DateTime(2024, 10, 5), Description = "Salário Outubro", Category = "Receita" },
+            new() { Id = "4", Amount = -100.00m, Date = new DateTime(2024, 9, 10), Description = "Compra Setembro", Category = "Alimentação" },
+            new() { Id = "5", Amount = -25.00m, Date = new DateTime(2024, 9, 25), Description = "Compra Setembro 2", Category = "Compras" },
+            new() { Id = "6", Amount = 1000.00m, Date = new DateTime(2024, 9, 1), Description = "Salário Setembro", Category = "Receita" }
         };
 
         var transactionsData = new TransactionsData
