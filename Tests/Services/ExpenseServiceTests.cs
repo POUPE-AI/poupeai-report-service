@@ -30,7 +30,7 @@ public class ExpenseServiceTests
             {
                 new()
                 {
-                    Id = 1,
+                    Id = "1",
                     Amount = -150.50m,
                     Date = new DateTime(2024, 10, 15),
                     Description = "Supermercado",
@@ -39,7 +39,7 @@ public class ExpenseServiceTests
                 },
                 new()
                 {
-                    Id = 2,
+                    Id = "2",
                     Amount = -50.00m,
                     Date = new DateTime(2024, 10, 20),
                     Description = "Gasolina",

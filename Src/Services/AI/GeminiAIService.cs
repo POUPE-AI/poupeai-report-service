@@ -31,7 +31,6 @@ internal class GeminiAIService(IConfiguration configuration, ILogger<GeminiAISer
 
                 var client = new Client(apiKey: _apiKey);
 
-                // Configurar a resposta estruturada com JSON schema
                 var config = new GenerateContentConfig
                 {
                     ResponseMimeType = "application/json",
@@ -76,7 +75,6 @@ internal class GeminiAIService(IConfiguration configuration, ILogger<GeminiAISer
             {
                 _logger.LogWarning(ex, "Rate limit or service error on attempt {Attempt}: {Message}", attempt, ex.Message);
 
-                // Se for erro de quota, usar delay maior (mínimo 20 segundos)
                 var delay = ex.Message.Contains("Quota") || ex.Message.Contains("quota")
                     ? Math.Max(20000, baseDelayMs * (int)Math.Pow(2, attempt))
                     : baseDelayMs * (int)Math.Pow(2, attempt - 1);
@@ -101,7 +99,6 @@ internal class GeminiAIService(IConfiguration configuration, ILogger<GeminiAISer
             }
         }
 
-        // This should never be reached, but just in case
         return Tools.CreateErrorResponse("Maximum retry attempts exceeded");
     }
 }

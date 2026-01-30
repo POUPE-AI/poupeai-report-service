@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace poupeai_report_service.DTOs.Responses.FinancesServiceResponses
@@ -5,48 +6,63 @@ namespace poupeai_report_service.DTOs.Responses.FinancesServiceResponses
     internal record TransactionResponse
     {
         [JsonPropertyName("id")]
-        public long Id { get; set; }
+        public string Id { get; init; } = null!;
 
         [JsonPropertyName("description")]
-        public string? Description { get; set; }
+        public string? Description { get; init; }
 
         [JsonPropertyName("amount")]
-        public decimal Amount { get; set; }
+        public decimal Amount { get; init; }
 
-        [JsonPropertyName("issue_date")]
-        public DateOnly IssueDate { get; set; }
+        [JsonPropertyName("transactionDate")]
+        public string? TransactionDate { get; init; }
 
         [JsonPropertyName("type")]
-        public string? Type { get; set; }
+        public string? Type { get; init; }
 
-        [JsonPropertyName("source_type")]
-        public string? SourceType { get; set; }
+        [JsonPropertyName("bankAccountId")]
+        public string? BankAccountId { get; init; }
+
+        [JsonPropertyName("creditCardId")]
+        public string? CreditCardId { get; init; }
 
         [JsonPropertyName("category")]
-        public long Category { get; set; }
+        public JsonElement Category { get; init; }
 
-        [JsonPropertyName("status")]
-        public string? Status { get; set; }
+        [JsonPropertyName("purchaseGroupUuid")]
+        public string? PurchaseGroupUuid { get; init; }
 
-        [JsonPropertyName("bank_account")]
-        public long? BankAccount { get; set; }
+        [JsonPropertyName("isInstallment")]
+        public bool? IsInstallment { get; init; }
 
-        [JsonPropertyName("credit_card")]
-        public long? CreditCard { get; set; }
+        [JsonPropertyName("installmentNumber")]
+        public int? InstallmentNumber { get; init; }
+
+        [JsonPropertyName("totalInstallments")]
+        public int? TotalInstallments { get; init; }
+
+        [JsonPropertyName("createdAt")]
+        public DateTimeOffset? CreatedAt { get; init; }
+
+        [JsonPropertyName("updatedAt")]
+        public DateTimeOffset? UpdatedAt { get; init; }
     }
 
     internal record TransactionsResponse
     {
-        [JsonPropertyName("count")]
-        public int Count { get; set; }
+        [JsonPropertyName("content")]
+        public List<TransactionResponse> Content { get; init; } = new();
 
-        [JsonPropertyName("next")]
-        public string? Next { get; set; }
+        [JsonPropertyName("page")]
+        public int Page { get; init; }
 
-        [JsonPropertyName("previous")]
-        public string? Previous { get; set; }
+        [JsonPropertyName("size")]
+        public int Size { get; init; }
 
-        [JsonPropertyName("results")]
-        public List<TransactionResponse> Results { get; set; } = [];
+        [JsonPropertyName("totalElements")]
+        public int TotalElements { get; init; }
+
+        [JsonPropertyName("totalPages")]
+        public int TotalPages { get; init; }
     }
 }

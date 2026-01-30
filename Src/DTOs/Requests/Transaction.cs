@@ -5,7 +5,7 @@ namespace poupeai_report_service.DTOs.Requests;
 internal record Transaction
 {
     [Description("ID da transação.")]
-    public long Id { get; set; }
+    public string Id { get; set; } = string.Empty;
 
     [Description("Descrição da transação.")]
     public string? Description { get; set; }
