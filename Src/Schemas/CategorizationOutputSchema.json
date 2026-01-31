@@ -1,0 +1,49 @@
+{
+    "type": "object",
+    "properties": {
+        "header": {
+            "type": "object",
+            "properties": {
+                "status": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "status"
+            ]
+        },
+        "content": {
+            "type": "object",
+            "properties": {
+                "categorizations": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "description": {
+                                "type": "string"
+                            },
+                            "category_id": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "description",
+                            "category_id"
+                        ]
+                    },
+                    "description": "Lista de categorizações com descrição e ID da categoria correspondente"
+                }
+            },
+            "required": [
+                "categorizations"
+            ]
+        }
+    },
+    "required": [
+        "header"
+    ]
+}
