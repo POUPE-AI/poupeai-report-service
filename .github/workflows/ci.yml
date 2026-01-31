@@ -14,7 +14,7 @@ permissions:
 env:
   DOTNET_VERSION: 8.0.x
   IMAGE_NAME: franciscopaulinoq/poupeai-report-service
-  INFRA_DIR: /home/deployer/poupeai-infra
+  INFRA_DIR: /home/deploy/poupeai-infra
 
 jobs:
   test:
