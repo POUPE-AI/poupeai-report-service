@@ -98,7 +98,13 @@ builder.Services.AddSingleton(sp =>
     var config = sp.GetRequiredService<IConfiguration>();
     var connectionString = config["Database:ConnectionString"];
     var databaseName = config["Database:DatabaseName"];
-    var client = new MongoClient(connectionString);
+
+    // Configurar MongoDB com timeout reduzido para falhar rapidamente se não estiver disponível
+    var settings = MongoClientSettings.FromConnectionString(connectionString);
+    settings.ServerSelectionTimeout = TimeSpan.FromSeconds(5); // Reduzir de 30s para 5s
+    settings.ConnectTimeout = TimeSpan.FromSeconds(5);
+
+    var client = new MongoClient(settings);
     return client.GetDatabase(databaseName);
 });
 

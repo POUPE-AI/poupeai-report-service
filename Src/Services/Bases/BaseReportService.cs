@@ -43,20 +43,30 @@ internal abstract class BaseReportService<TModel, TResponse>(IMongoDatabase data
     {
         try
         {
-
             var hash = Hash.GenerateFromTransaction(transactionsData, model);
-            var existingReport = await _collection.Find(r => r.Hash == hash).FirstOrDefaultAsync();
-            if (existingReport != null)
+
+            // Tentar buscar do cache (MongoDB) - se falhar, continuar sem cache
+            TModel? existingReport = null;
+            try
             {
-                _logger.Information("Report already exists for hash: {Hash}", hash);
-                return Results.Ok(new
+                existingReport = await _collection.Find(r => r.Hash == hash).FirstOrDefaultAsync();
+                if (existingReport != null)
                 {
-                    Header = new
+                    _logger.Information("Report found in cache for hash: {Hash}", hash);
+                    return Results.Ok(new
                     {
-                        Status = 200,
-                    },
-                    Content = existingReport
-                });
+                        Header = new
+                        {
+                            Status = 200,
+                        },
+                        Content = existingReport
+                    });
+                }
+                _logger.Debug("Report not found in cache, generating new report for hash: {Hash}", hash);
+            }
+            catch (Exception cacheEx)
+            {
+                _logger.Warning(cacheEx, "Failed to check cache (MongoDB). Proceeding without cache for hash: {Hash}", hash);
             }
 
             var dataJson = JsonSerializer.Serialize(transactionsData);
@@ -110,10 +120,17 @@ internal abstract class BaseReportService<TModel, TResponse>(IMongoDatabase data
             reportModel.EndDate = transactionsData.EndDate;
             reportModel.UpdatedAt = DateTime.UtcNow;
 
-            // Salvar relatório no banco de dados
-            await _collection.InsertOneAsync(reportModel);
+            // Tentar salvar no cache (MongoDB) - se falhar, apenas logar e continuar
+            try
+            {
+                await _collection.InsertOneAsync(reportModel);
+                _logger.Information("Report generated and saved to cache successfully for hash: {Hash}", hash);
+            }
+            catch (Exception cacheEx)
+            {
+                _logger.Warning(cacheEx, "Failed to save report to cache (MongoDB). Report generated but not cached for hash: {Hash}", hash);
+            }
 
-            _logger.Information("Report generated and saved successfully for hash: {Hash}", hash);
             return Results.Created(string.Empty, new
             {
                 (response as dynamic).Header,
